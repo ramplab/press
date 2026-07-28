@@ -1,0 +1,115 @@
+/* The code plate: captioned figure in the reading flow (direction-d.html
+   #codefig) — no window chrome, small-caps FIGURE label, italic caption. */
+.figure {
+  margin: 56px 0 0;
+}
+
+.codeCard {
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  overflow: auto;
+  box-shadow: var(--shadow);
+}
+
+.plateFoot {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 10px;
+  font-family: var(--f-ui);
+  font-size: 12px;
+  color: var(--ink3);
+}
+
+.source {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.path {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--ink2);
+}
+
+.sourceLines {
+  color: var(--ink3);
+}
+
+.overlayBadge {
+  color: var(--accent);
+  border: 1px solid var(--rule2);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.copy {
+  margin-left: auto;
+  font-family: var(--f-ui);
+  font-size: 11px;
+  color: var(--ink3);
+  border: 1px solid var(--rule2);
+  border-radius: 999px;
+  padding: 2px 10px;
+  background: none;
+  cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+
+.copy:hover,
+.copy:focus-visible {
+  border-color: var(--ink3);
+  color: var(--ink);
+}
+
+/* The caption is the author's voice: italic serif, centered. */
+.caption {
+  margin: 24px auto 0;
+  max-width: 640px;
+  font-style: italic;
+  font-size: 13.5px;
+  color: var(--ink2);
+  line-height: 1.6;
+  text-align: center;
+}
+
+.figureNumber {
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.anchors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: center;
+}
+
+.anchor {
+  font-family: var(--f-mono);
+  font-style: normal;
+  font-size: 10.5px;
+  color: var(--ink2);
+  border: 1px solid var(--rule2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  background: var(--paper2);
+  cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+
+.anchor:hover {
+  border-color: var(--ink3);
+  color: var(--ink);
+}

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "pipeline-fixture",
+  "title": "Pipeline Fixture Lab",
+  "base": {
+    "modules": [
+      {
+        "id": "generation-pipeline",
+        "title": "The Generation Pipeline",
+        "widgets": [
+          {
+            "id": "gen-pipeline",
+            "type": "pipeline",
+            "title": "Lab generation pipeline",
+            "stages": [
+              {
+                "id": "map",
+                "label": "Repo map",
+                "description": {
+                  "body": "Walk the repository and sketch its subsystems.",
+                  "anchors": [
+                    { "file": "packages/generator/src/resolveAnchors.ts", "symbol": "resolveAnchors" }
+                  ]
+                },
+                "flow": { "in": "repo directory", "out": "subsystem map" }
+              },
+              {
+                "id": "author",
+                "label": "Author",
+                "flow": { "in": "subsystem map", "out": "draft spec JSON" }
+              },
+              {
+                "id": "verify",
+                "label": "Verify",
+                "description": {
+                  "body": "Every anchor is resolved against the real files.",
+                  "anchors": [
+                    {
+                      "file": "packages/generator/src/resolveAnchors.ts",
+                      "symbol": "resolveAnchor",
+                      "lines": { "start": 189, "end": 241 }
+                    }
+                  ]
+                }
+              },
+              { "id": "assemble", "label": "Assemble spec" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "overlay": [
+    {
+      "id": "lead-pipeline-note",
+      "target": { "moduleId": "generation-pipeline" },
+      "widget": {
+        "id": "tribal-pipeline",
+        "type": "pipeline",
+        "title": "How releases actually ship",
+        "stages": [
+          {
+            "id": "freeze",
+            "label": "freeze",
+            "description": { "body": "Unanchored tribal knowledge: we freeze on Thursdays." }
+          },
+          { "id": "ship", "label": "ship", "flow": { "out": "a release" } }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "quiz-fixture",
+  "title": "Quiz Fixture Lab",
+  "base": {
+    "modules": [
+      {
+        "id": "spec-parsing",
+        "title": "Spec Parsing",
+        "widgets": [
+          {
+            "id": "parsing-checkpoint",
+            "type": "quiz",
+            "title": "Checkpoint: parsing",
+            "questions": [
+              {
+                "id": "unknown-version",
+                "prompt": "A spec arrives with schemaVersion 99. What does safeParseLabSpec do?",
+                "options": [
+                  { "id": "rejects-early", "label": "Rejects it before schema validation even runs" },
+                  { "id": "coerces", "label": "Coerces it down to version 1" },
+                  { "id": "throws", "label": "Throws a LabSpecParseError" }
+                ],
+                "correctOptionId": "rejects-early",
+                "explanation": {
+                  "body": "The version gate runs first, so old parsers never half-validate a newer spec.",
+                  "anchors": [
+                    { "file": "packages/spec/src/parse.ts", "symbol": "safeParseLabSpec" }
+                  ]
+                }
+              },
+              {
+                "id": "unanchored-callout",
+                "prompt": "A machine-generated callout carries zero anchors. What happens?",
+                "options": [
+                  { "id": "schema-rejects", "label": "Schema validation fails — grounding is structural" },
+                  { "id": "renders-anyway", "label": "It renders with a warning badge" }
+                ],
+                "correctOptionId": "schema-rejects",
+                "explanation": {
+                  "body": "Anchors are a structural requirement on machine content, not a convention.",
+                  "anchors": [
+                    { "file": "packages/spec/src/schema.ts", "symbol": "calloutWidgetSchema" }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "overlay": [
+    {
+      "id": "lead-quiz-note",
+      "target": { "moduleId": "spec-parsing" },
+      "widget": {
+        "id": "tribal-quiz",
+        "type": "quiz",
+        "title": "Team lore check",
+        "questions": [
+          {
+            "id": "who-reviews",
+            "prompt": "Who reviews generated labs before publish?",
+            "options": [
+              { "id": "the-lead", "label": "The onboarding lead" },
+              { "id": "nobody", "label": "Nobody, they ship straight to hires" }
+            ],
+            "correctOptionId": "the-lead",
+            "explanation": {
+              "body": "Unanchored tribal knowledge: the lead signs off every draft in the overlay flow."
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

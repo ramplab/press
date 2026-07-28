@@ -1,0 +1,26 @@
+/*
+ * Edition inline code — an identifier set in the author's prose. The
+ * mono-only-in-code rule (theme.css) holds: inline code IS code, so it takes
+ * the mono face and the code ink, sitting on a restrained warm tint that reads
+ * as "set apart" without shouting over the serif measure. Tokens are defined
+ * in theme.css (--inline-code-*) so both printings tune together.
+ */
+.inlineCode {
+  font-family: var(--f-mono);
+  /* Mono runs visually larger than the serif body; step it down so the span
+     sits on the baseline instead of bulging the line. */
+  font-size: 0.86em;
+  line-height: inherit;
+  color: var(--inline-code-ink);
+  background: var(--inline-code-bg);
+  border: 1px solid var(--inline-code-border);
+  border-radius: 4px;
+  /* Tight vertical padding keeps the line rhythm; clone the box across wraps
+     so a long path that breaks keeps its tint on both fragments. */
+  padding: 0.05em 0.34em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  /* Long file paths / package names may break rather than overflow the
+     measure. */
+  overflow-wrap: anywhere;
+}

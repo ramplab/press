@@ -1,0 +1,43 @@
+{
+  "name": "@ramplab/spec",
+  "version": "1.0.2",
+  "private": false,
+  "type": "module",
+  "description": "The RampLab edition format: versioned Zod schemas, parser and resolver for a lab spec. Everything that reads or writes an edition meets this contract.",
+  "keywords": [
+    "ramplab",
+    "schema",
+    "zod",
+    "onboarding"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ramplab/press.git"
+  },
+  "homepage": "https://library.ramplab.dev/cli/",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  }
+}

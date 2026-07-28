@@ -1,0 +1,212 @@
+/* Data-model explorer as a produced figure (Edition): the tree is code
+   (mono, §4.5 syntax roles); the field notes are the author's serif voice. */
+.explorer {
+  margin: 56px 0 0;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 8px;
+  font-family: var(--f-ui);
+}
+
+.badge {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+
+.title {
+  font-size: 13px;
+  color: var(--ink3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overlayBadge {
+  color: var(--accent);
+  border: 1px solid var(--rule2);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.source {
+  margin-left: auto;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: var(--ink3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 22px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The tree is a code panel. */
+.tree {
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--code-ink);
+  overflow-x: auto;
+  box-shadow: var(--shadow);
+}
+
+.row {
+  white-space: nowrap;
+}
+
+.punct {
+  color: var(--code-punct);
+}
+
+.toggle {
+  display: inline-block;
+  width: 16px;
+  color: var(--code-dim);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.key {
+  background: none;
+  border: 0;
+  padding: 0 2px;
+  font: inherit;
+  color: var(--code-fn);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+
+.key:hover {
+  background: var(--code-hi);
+}
+
+.key[aria-pressed='true'] {
+  background: var(--code-hi);
+  box-shadow: inset 0 -2px 0 var(--code-bar);
+  color: var(--code-ink);
+}
+
+.string {
+  color: var(--code-string);
+}
+
+.number {
+  color: var(--code-num);
+}
+
+.boolean {
+  color: var(--code-num);
+}
+
+.typeHint {
+  color: var(--code-type);
+  font-style: italic;
+}
+
+/* Field notes: sticky panel — sans frame, serif explanation. */
+.panel {
+  position: sticky;
+  top: 76px;
+  display: block;
+  border: 1px solid var(--rule2);
+  border-radius: var(--r);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  padding: 14px 16px;
+  font-size: 13.5px;
+  color: var(--ink2);
+  min-height: 64px;
+}
+
+.placeholder {
+  font-family: var(--f-ui);
+  font-size: 12.5px;
+  color: var(--ink3);
+}
+
+.panelPath {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.panelType {
+  color: var(--ink3);
+  font-weight: 400;
+}
+
+.panelBody {
+  margin: 8px 0 0;
+  font-family: var(--f-body);
+  color: var(--ink2);
+}
+
+.readBy {
+  margin: 8px 0 0;
+  font-family: var(--f-ui);
+  font-size: 12px;
+  color: var(--ink3);
+}
+
+.anchors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.anchor {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: var(--ink2);
+  border: 1px solid var(--rule2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  background: var(--paper2);
+  cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+
+.anchor:hover {
+  border-color: var(--ink3);
+  color: var(--ink);
+}
+
+.lines {
+  color: var(--ink3);
+}

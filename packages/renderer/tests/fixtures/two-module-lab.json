@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "renderer-fixture",
+  "title": "Renderer Fixture Lab",
+  "repo": "ramplab/ramplab",
+  "base": {
+    "modules": [
+      {
+        "id": "first-module",
+        "title": "First Module",
+        "summary": "Everything starts at the spec.",
+        "widgets": [
+          {
+            "id": "why-anchor",
+            "type": "callout",
+            "kind": "why",
+            "title": "Why anchors",
+            "body": "Every machine claim points back at real code.",
+            "anchors": [
+              { "file": "packages/spec/src/schema.ts", "symbol": "anchorSchema" }
+            ]
+          },
+          {
+            "id": "warn-regen",
+            "type": "callout",
+            "kind": "warning",
+            "body": "Regeneration rewrites the base; never hand-edit it.",
+            "anchors": [
+              { "file": "packages/spec/src/resolve.ts", "lines": { "start": 1, "end": 20 } }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "second-module",
+        "title": "Second Module",
+        "widgets": [
+          {
+            "id": "connect-renderer",
+            "type": "callout",
+            "kind": "connects-to",
+            "title": "Connects to",
+            "body": "The renderer consumes the spec seam, nothing else.",
+            "anchors": [
+              { "file": "packages/renderer/src/Lab.tsx", "symbol": "Lab" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "overlay": [
+    {
+      "id": "lead-note",
+      "target": { "moduleId": "first-module", "afterWidgetId": "why-anchor" },
+      "widget": {
+        "id": "tribal-warning",
+        "type": "callout",
+        "kind": "warning",
+        "body": "Tribal knowledge: the staging repo lags a day behind."
+      }
+    }
+  ]
+}

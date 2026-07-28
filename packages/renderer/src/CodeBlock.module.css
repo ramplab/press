@@ -1,0 +1,48 @@
+/* The Edition code panel: research.md §4.5 / direction-d.html pre.code. */
+.code {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--code-ink);
+  padding: 14px 0;
+  min-width: max-content;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  transition: opacity var(--t-med) ease, background var(--t-med) ease;
+}
+
+/* Pinned against horizontal scroll. The gutter used to travel with the code,
+   so scrolling right to finish a long line took the line numbers off-screen,
+   which are the anchor the claim is checked against. */
+.lineNumber {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  color: var(--code-dim);
+  text-align: right;
+  padding-right: 16px;
+  user-select: none;
+  background: inherit;
+}
+
+.lineText {
+  white-space: pre;
+  padding-right: 20px;
+}
+
+/* Walkthrough focus device: inactive lines recede, the step's lines carry
+   the wash + bar. Dimming is uniform across tokens (research.md §4.5). */
+.line[data-dim='true'] {
+  /* 0.45 put unlit code near 2:1. It is still the focus device, but a reader
+     whose eye is one step ahead of the panel should be able to read it. */
+  opacity: 0.6;
+}
+
+.line[data-hl='true'] {
+  background: var(--code-hi);
+  box-shadow: inset 3px 0 0 var(--code-bar);
+}

@@ -1,0 +1,121 @@
+/* Contents (TOC): Edition — sans machinery rows with kept dotted leaders. */
+.nav {
+  font-family: var(--f-ui);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  position: relative;
+  border-bottom: 1px solid var(--rule);
+}
+
+.row:first-child {
+  border-top: 1px solid var(--rule);
+}
+
+.item {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 15px 26px 15px 2px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--ink);
+  font: inherit;
+  text-decoration: none;
+  transition: background var(--t-med);
+}
+
+.item:hover,
+.item:focus-visible {
+  background: var(--wash);
+}
+
+.num {
+  flex: 0 0 44px;
+  color: var(--ink3);
+  font-size: 13px;
+}
+
+.entry {
+  min-width: 0;
+}
+
+.title {
+  display: block;
+  font-weight: 600;
+  font-size: 15.5px;
+  line-height: 1.4;
+}
+
+.row[data-state='ahead'] .title {
+  color: var(--ink2);
+  font-weight: 500;
+}
+
+.item[aria-current] .title {
+  color: var(--accent);
+}
+
+.census {
+  display: block;
+  font-size: 12.5px;
+  color: var(--ink3);
+  margin-top: 3px;
+}
+
+.leader {
+  flex: 1;
+  border-bottom: 1px dotted var(--rule2);
+  transform: translateY(-4px);
+  min-width: 24px;
+}
+
+.scope {
+  flex: 0 0 auto;
+  color: var(--ink3);
+  font-size: 13px;
+}
+
+.ribbon {
+  display: inline-block;
+  margin-left: 12px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: 2px;
+  padding: 2px 8px 2px 9px;
+  position: relative;
+  top: -2px;
+  white-space: nowrap;
+}
+
+/* Completion ✓ sits at the row's edge like a proof mark; viewed = quiet dot. */
+.done {
+  position: absolute;
+  right: 4px;
+  top: 19px;
+  color: var(--ok);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.seen {
+  position: absolute;
+  right: 6px;
+  top: 17px;
+  color: var(--ink3);
+  font-size: 13px;
+  line-height: 1;
+}

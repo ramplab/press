@@ -1,0 +1,47 @@
+{
+  "name": "@ramplab/generator",
+  "version": "1.0.4",
+  "private": false,
+  "type": "module",
+  "description": "The RampLab pipeline: reads a repository, writes an edition of it, and mechanically resolves every code anchor against the source so nothing unverifiable survives.",
+  "keywords": [
+    "ramplab",
+    "onboarding",
+    "claude",
+    "code-analysis"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.201",
+    "@ramplab/spec": "workspace:*",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ramplab/press.git"
+  },
+  "homepage": "https://library.ramplab.dev/cli/",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "live": "pnpm run build && node dist/live.js"
+  }
+}

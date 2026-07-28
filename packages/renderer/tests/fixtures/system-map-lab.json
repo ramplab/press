@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "system-map-fixture",
+  "title": "System Map Fixture Lab",
+  "repo": "ramplab/ramplab",
+  "base": {
+    "modules": [
+      {
+        "id": "architecture",
+        "title": "Architecture",
+        "summary": "How the pieces fit together.",
+        "widgets": [
+          {
+            "id": "arch-map",
+            "type": "system-map",
+            "title": "RampLab, end to end",
+            "nodes": [
+              {
+                "id": "spec",
+                "label": "Lab spec",
+                "description": "Versioned Zod schemas; the contract everything meets.",
+                "anchors": [
+                  { "file": "packages/spec/src/schema.ts", "symbol": "labSpecSchema" },
+                  { "file": "packages/spec/src/parse.ts", "symbol": "parseLabSpec", "lines": { "start": 60, "end": 66 } }
+                ]
+              },
+              {
+                "id": "renderer",
+                "label": "Renderer",
+                "description": "Fixed, hand-built React widget library.",
+                "anchors": [
+                  { "file": "packages/renderer/src/Lab.tsx", "symbol": "Lab" }
+                ]
+              },
+              {
+                "id": "playground",
+                "label": "Playground"
+              }
+            ],
+            "edges": [
+              {
+                "from": "spec",
+                "to": "renderer",
+                "label": "parsed spec JSON",
+                "anchors": [
+                  { "file": "packages/spec/src/parse.ts", "symbol": "safeParseLabSpec" }
+                ]
+              },
+              {
+                "from": "renderer",
+                "to": "playground"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "overlay": []
+}

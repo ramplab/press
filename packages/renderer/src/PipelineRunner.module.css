@@ -1,0 +1,241 @@
+/* Pipeline as a produced figure (Edition): a joined row of stages, sans
+   machinery, the active stage carrying the accent. */
+.frame {
+  margin: 56px 0 0;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 8px;
+  font-family: var(--f-ui);
+}
+
+.badge {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+
+.title {
+  font-size: 13px;
+  color: var(--ink3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overlayBadge {
+  margin-left: auto;
+  color: var(--accent);
+  border: 1px solid var(--rule2);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.body {
+  font-family: var(--f-ui);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.btn {
+  font-family: var(--f-ui);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 4px 14px;
+  cursor: pointer;
+  transition: opacity var(--t-med);
+}
+
+.ghostBtn {
+  font-family: var(--f-ui);
+  font-size: 12px;
+  color: var(--ink2);
+  border: 1px solid var(--rule2);
+  border-radius: 999px;
+  padding: 3.5px 12px;
+  background: none;
+  cursor: pointer;
+  transition: border-color var(--t-med), color var(--t-med);
+}
+
+.ghostBtn:hover:not(:disabled),
+.ghostBtn:focus-visible {
+  border-color: var(--ink3);
+  color: var(--ink);
+}
+
+.ghostBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.progress {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--ink3);
+}
+
+.pipeline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.stage {
+  flex: 1 1 150px;
+  min-width: 150px;
+  text-align: left;
+  border: 1px solid var(--rule2);
+  border-radius: var(--r);
+  background: var(--paper);
+  padding: 10px 12px;
+  cursor: pointer;
+  font-family: var(--f-ui);
+  color: var(--ink2);
+  box-shadow: var(--shadow);
+  transition: border-color var(--t-med), background var(--t-med), color var(--t-med);
+}
+
+.stage:hover {
+  border-color: var(--ink3);
+}
+
+.stage[data-state='active'] {
+  border-color: var(--accent);
+  background: var(--wash);
+  color: var(--ink);
+  box-shadow: 0 0 0 3px var(--wash2);
+}
+
+.stage[data-state='done'] {
+  border-color: var(--rule2);
+  background: var(--paper2);
+  color: var(--ink2);
+}
+
+.stageId {
+  display: block;
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  color: var(--ink3);
+}
+
+.stageLabel {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-top: 3px;
+  color: inherit;
+}
+
+.stage[data-state='active'] .stageLabel {
+  color: var(--accent);
+}
+
+.stageFlow {
+  display: block;
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  color: var(--ink3);
+  margin-top: 5px;
+  min-height: 1.2em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.info {
+  margin-top: 14px;
+  border-top: 1px solid var(--rule);
+  padding: 13px 2px 0;
+  font-size: 13.5px;
+  color: var(--ink2);
+  min-height: 48px;
+}
+
+.placeholder {
+  font-size: 12.5px;
+  color: var(--ink3);
+}
+
+.complete {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ok);
+}
+
+.stageLine {
+  margin: 0;
+  font-family: var(--f-body);
+}
+
+.stageLine b {
+  font-family: var(--f-ui);
+  color: var(--ink);
+}
+
+.flowDetail {
+  display: flex;
+  gap: 18px;
+  margin: 8px 0 0;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--ink2);
+}
+
+.flowKey {
+  font-family: var(--f-ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-right: 6px;
+}
+
+.anchors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.anchor {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: var(--ink2);
+  border: 1px solid var(--rule2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  background: var(--paper2);
+  cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+
+.anchor:hover {
+  border-color: var(--ink3);
+  color: var(--ink);
+}

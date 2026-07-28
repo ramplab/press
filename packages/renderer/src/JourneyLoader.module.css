@@ -1,0 +1,209 @@
+/*
+ * Codebase → Journey loader. One shared clock: --journey-loop. Each line and
+ * stage inks in at its own offset (--i) and the whole composition resets
+ * together, matching the founder's motion spec. Reduced motion = everything
+ * fully inked, nothing moves.
+ */
+
+.loader {
+  --journey-loop: 4.2s;
+  --step: calc(var(--journey-loop) / 7); /* 6 lines + a settled beat */
+  max-width: 480px;
+  margin: 64px auto;
+  font-family: var(--f-body, Charter, Georgia, serif);
+  color: var(--ink, #241f16);
+}
+
+.compact {
+  margin: 28px auto;
+  max-width: 400px;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--f-ui, system-ui, sans-serif);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink2, #635b4c);
+  margin-bottom: 22px;
+}
+.compact .head {
+  margin-bottom: 14px;
+}
+
+.code {
+  margin: 0 0 22px;
+  padding-left: 24px;
+  /* The mono voice — this is code, not prose (register rule, theme.css). */
+  font-family: var(--f-mono, ui-monospace, "SF Mono", Menlo, monospace);
+  font-size: 12.5px;
+  line-height: 1.75;
+  white-space: pre;
+  overflow-x: auto;
+}
+.compact .code {
+  font-size: 11.5px;
+  margin-bottom: 14px;
+  padding-left: 12px;
+}
+
+/* A line waits drained and quiet, then inks in at its offset — opacity +
+   saturation animate on the parent, so the per-token syntax colors below
+   survive the cascade and arrive together with the ink. */
+.line {
+  color: var(--code-ink, #33291a);
+  opacity: 0.38;
+  filter: saturate(0);
+  animation: journey-ink var(--journey-loop) infinite;
+  animation-delay: calc(var(--i) * var(--step));
+}
+.kw {
+  color: var(--code-keyword, #88422e);
+}
+.fn {
+  color: var(--code-fn, #2f5e83);
+}
+
+.stages {
+  display: flex;
+  justify-content: space-between;
+  max-width: 420px;
+  margin: 0 auto 18px;
+  padding: 0 8px;
+}
+.compact .stages {
+  margin-bottom: 12px;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink3, #99917e);
+  animation: journey-ink var(--journey-loop) infinite;
+  animation-delay: calc((var(--i) + 0.5) * var(--step));
+}
+.compact .stage {
+  gap: 7px;
+}
+
+.numeral {
+  font-family: var(--f-display, "Iowan Old Style", Georgia, serif);
+  font-size: 15px;
+}
+
+.stageLabel {
+  font-family: var(--f-body, Charter, Georgia, serif);
+  font-size: 14px;
+}
+.compact .numeral {
+  font-size: 13px;
+}
+.compact .stageLabel {
+  font-size: 12.5px;
+}
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  font-size: 14.5px;
+  color: var(--ink, #241f16);
+}
+.compact .foot {
+  font-size: 12.5px;
+}
+
+.message {
+  font-style: normal;
+}
+
+/* The counter: five stacked readings, each visible for one step of the loop. */
+.counter {
+  position: relative;
+  display: inline-block;
+  min-width: 9ch;
+  text-align: right;
+}
+.count {
+  position: absolute;
+  right: 0;
+  top: 0;
+  opacity: 0;
+  white-space: nowrap;
+  animation: journey-count var(--journey-loop) infinite;
+  animation-delay: calc((var(--i) + 0.5) * var(--step));
+}
+.count:first-child {
+  position: static; /* reserves the line height */
+}
+
+@keyframes journey-ink {
+  0% {
+    opacity: 0.38;
+    filter: saturate(0);
+  }
+  4%,
+  96% {
+    opacity: 1;
+    filter: none;
+  }
+  100% {
+    opacity: 0.38;
+    filter: saturate(0);
+  }
+}
+
+/* The stages ink by color (they're single-tone). */
+.stage {
+  animation-name: journey-stage;
+}
+@keyframes journey-stage {
+  0% {
+    color: var(--ink3, #99917e);
+  }
+  4%,
+  96% {
+    color: var(--ink, #241f16);
+  }
+  100% {
+    color: var(--ink3, #99917e);
+  }
+}
+
+@keyframes journey-count {
+  0%,
+  13% {
+    opacity: 1;
+  }
+  14%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line,
+  .stage,
+  .count {
+    animation: none;
+  }
+  .line {
+    opacity: 1;
+    filter: none;
+  }
+  .stage {
+    color: var(--ink, #241f16);
+  }
+  .count {
+    opacity: 0;
+  }
+  .count:last-child {
+    opacity: 1;
+  }
+}

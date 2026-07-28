@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "state-machine-renderer-fixture",
+  "title": "State Machine Renderer Fixture",
+  "repo": "ramplab/ramplab",
+  "base": {
+    "modules": [
+      {
+        "id": "doc-lifecycle",
+        "title": "Document Lifecycle",
+        "widgets": [
+          {
+            "id": "doc-status",
+            "type": "state-machine",
+            "title": "DocumentStatus state machine",
+            "states": [
+              {
+                "id": "pending",
+                "label": "pending",
+                "description": {
+                  "body": "Just uploaded; waiting for the validator to pick it up.",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "DocumentStatus"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "validating",
+                "label": "validating"
+              },
+              {
+                "id": "accepted",
+                "label": "accepted"
+              },
+              {
+                "id": "rejected",
+                "label": "rejected"
+              }
+            ],
+            "transitions": [
+              {
+                "from": "pending",
+                "to": "validating",
+                "trigger": "SSE opens",
+                "commentary": {
+                  "body": "The wizard opens the validation stream as soon as the upload lands.",
+                  "anchors": [
+                    {
+                      "file": "app/api/validate/route.ts",
+                      "symbol": "POST",
+                      "lines": {
+                        "start": 12,
+                        "end": 40
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "from": "validating",
+                "to": "accepted",
+                "trigger": "PASSED",
+                "commentary": {
+                  "body": "A clean verdict marks the document complete.",
+                  "anchors": [
+                    {
+                      "file": "lib/validation/verdict.ts",
+                      "symbol": "applyVerdict"
+                    }
+                  ]
+                }
+              },
+              {
+                "from": "validating",
+                "to": "rejected",
+                "trigger": "FAILED"
+              },
+              {
+                "from": "rejected",
+                "to": "pending",
+                "trigger": "re-upload"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "overlay": []
+}

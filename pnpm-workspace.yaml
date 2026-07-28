@@ -1,0 +1,11 @@
+packages:
+  - packages/*
+  - apps/*
+
+onlyBuiltDependencies:
+  - esbuild
+
+allowBuilds:
+  # esbuild's install script fetches its prebuilt platform binary; export and
+  # preview bundle with it.
+  esbuild: true

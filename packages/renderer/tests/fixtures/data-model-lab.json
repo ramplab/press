@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "data-model-fixture",
+  "title": "Data Model Fixture Lab",
+  "repo": "ramplab/ramplab",
+  "base": {
+    "modules": [
+      {
+        "id": "the-data-model",
+        "title": "The Data Model",
+        "summary": "One shape to learn.",
+        "widgets": [
+          {
+            "id": "application-data-explorer",
+            "type": "data-model",
+            "title": "ApplicationData explorer",
+            "source": { "file": "lib/types/application-data.ts" },
+            "nodes": [
+              {
+                "name": "fields",
+                "type": "Record<fieldId, value>",
+                "annotation": {
+                  "body": "Flat map of every questionnaire answer, keyed by field IDs from the config.",
+                  "readBy": "Read by: RuleEngine.buildContext(), the wizard's FieldsGrid.",
+                  "anchors": [
+                    { "file": "lib/types/application-data.ts", "symbol": "ApplicationData", "lines": { "start": 12, "end": 40 } }
+                  ]
+                },
+                "children": [
+                  {
+                    "name": "company_name",
+                    "type": "string",
+                    "example": "Nimbus Retail Ltd",
+                    "annotation": {
+                      "body": "A registry-enriched field — it came from Companies House, not the user.",
+                      "anchors": [
+                        { "file": "lib/enrichment/registry.ts", "symbol": "applyRegistryFields" }
+                      ]
+                    }
+                  },
+                  { "name": "gross_revenue_12m", "type": "number", "example": 8000000 },
+                  { "name": "is_profitable", "type": "boolean", "example": true }
+                ]
+              },
+              {
+                "name": "people",
+                "type": "Person[]",
+                "annotation": {
+                  "body": "Directors, UBOs, shareholders — one row per human.",
+                  "anchors": [{ "file": "lib/types/person.ts", "symbol": "Person" }]
+                },
+                "children": [
+                  {
+                    "name": "source",
+                    "type": "PersonSource",
+                    "example": "registry_dismissed",
+                    "annotation": {
+                      "body": "A soft delete that preserves the audit trail.",
+                      "readBy": "Read by: getActivePeople().",
+                      "anchors": [
+                        { "file": "lib/people/active.ts", "symbol": "getActivePeople", "lines": { "start": 8, "end": 21 } }
+                      ]
+                    }
+                  },
+                  { "name": "confirmed", "type": "boolean", "example": false }
+                ]
+              },
+              { "name": "meta", "type": "ApplicationMeta" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "overlay": []
+}

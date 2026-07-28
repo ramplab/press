@@ -1,0 +1,49 @@
+{
+  "name": "@ramplab/cli",
+  "version": "1.0.7",
+  "private": false,
+  "type": "module",
+  "description": "Press a guided reading of any codebase from the command line, where every claim carries a code anchor checked against the source. Runs on your own machine, on the Claude Code login you already have.",
+  "keywords": [
+    "onboarding",
+    "codebase",
+    "documentation",
+    "claude",
+    "cli",
+    "developer-experience"
+  ],
+  "bin": {
+    "ramplab": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@ramplab/generator": "workspace:*",
+    "@ramplab/renderer": "workspace:*",
+    "@ramplab/spec": "workspace:*",
+    "esbuild": "^0.25.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^26.1.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ramplab/press.git"
+  },
+  "homepage": "https://library.ramplab.dev/cli/",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "fixture-lab",
+  "title": "Fixture Lab",
+  "repo": "ramplab/ramplab",
+  "base": {
+    "modules": [
+      {
+        "id": "module-one",
+        "title": "Module One",
+        "summary": "The first module.",
+        "widgets": [
+          {
+            "id": "why-first",
+            "type": "callout",
+            "kind": "why",
+            "title": "Why this exists",
+            "body": "Because the spec is the product's true API.",
+            "anchors": [
+              { "file": "packages/spec/src/schema.ts", "symbol": "labSpecSchema" }
+            ]
+          },
+          {
+            "id": "warn-first",
+            "type": "callout",
+            "kind": "warning",
+            "body": "Anchors are checked mechanically at build time.",
+            "anchors": [
+              { "file": "packages/spec/src/schema.ts", "lines": { "start": 30, "end": 45 } }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "overlay": [
+    {
+      "id": "lead-note-one",
+      "target": { "moduleId": "module-one", "afterWidgetId": "why-first" },
+      "widget": {
+        "id": "tribal-note",
+        "type": "callout",
+        "kind": "connects-to",
+        "title": "Team note",
+        "body": "Ask in #onboarding before touching this — tribal knowledge, no anchor."
+      }
+    }
+  ]
+}

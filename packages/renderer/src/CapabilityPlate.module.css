@@ -1,0 +1,60 @@
+/* The capability plate: double-ruled, centered furniture; serif body. */
+.plate {
+  margin: 80px auto 0;
+  max-width: 640px;
+  padding: 34px 36px 30px;
+  background: var(--plate);
+  border-top: 3px double var(--rule2);
+  border-bottom: 3px double var(--rule2);
+  text-align: center;
+}
+
+.kicker {
+  display: block;
+  margin-bottom: 16px;
+  font-family: var(--f-ui);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+
+.body {
+  margin: 0;
+  font-size: calc(var(--fs-body) - 0.5px);
+  text-align: left;
+  color: var(--ink);
+}
+
+.overlayBadge {
+  display: inline-block;
+  margin-top: 14px;
+  font-family: var(--f-ui);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--rule2);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+
+.anchors {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.anchor {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: var(--ink2);
+  border: 1px solid var(--rule2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  background: var(--paper);
+}

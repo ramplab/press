@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "state-machine-fixture",
+  "title": "State Machine Fixture Lab",
+  "base": {
+    "modules": [
+      {
+        "id": "doc-lifecycle",
+        "title": "Document Lifecycle",
+        "widgets": [
+          {
+            "id": "doc-status",
+            "type": "state-machine",
+            "title": "DocumentStatus state machine",
+            "states": [
+              {
+                "id": "pending",
+                "label": "pending",
+                "description": {
+                  "body": "Just uploaded; waiting for the validator.",
+                  "anchors": [
+                    { "file": "packages/spec/src/schema.ts", "symbol": "stateMachineWidgetSchema" }
+                  ]
+                }
+              },
+              { "id": "validating", "label": "validating" },
+              { "id": "accepted", "label": "accepted" },
+              { "id": "rejected", "label": "rejected" }
+            ],
+            "transitions": [
+              {
+                "from": "pending",
+                "to": "validating",
+                "trigger": "SSE opens",
+                "commentary": {
+                  "body": "The wizard opens the validation stream as soon as the upload lands.",
+                  "anchors": [
+                    { "file": "packages/spec/src/parse.ts", "symbol": "safeParseLabSpec" }
+                  ]
+                }
+              },
+              { "from": "validating", "to": "accepted", "trigger": "PASSED" },
+              { "from": "validating", "to": "rejected", "trigger": "FAILED" },
+              { "from": "rejected", "to": "pending", "trigger": "re-upload" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "overlay": [
+    {
+      "id": "lead-machine-note",
+      "target": { "moduleId": "doc-lifecycle" },
+      "widget": {
+        "id": "tribal-machine",
+        "type": "state-machine",
+        "title": "How reviews actually flow",
+        "states": [
+          {
+            "id": "waiting-on-ops",
+            "label": "waiting on ops",
+            "description": { "body": "Unanchored tribal knowledge: ops batches reviews on Fridays." }
+          },
+          { "id": "unblocked", "label": "unblocked" }
+        ],
+        "transitions": [
+          {
+            "from": "waiting-on-ops",
+            "to": "unblocked",
+            "trigger": "ping #ops",
+            "commentary": { "body": "A polite nudge works better than a ticket." }
+          }
+        ]
+      }
+    }
+  ]
+}

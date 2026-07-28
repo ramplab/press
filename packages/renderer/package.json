@@ -1,0 +1,81 @@
+{
+  "name": "@ramplab/renderer",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "description": "React components that render a RampLab edition, used by the command line to preview an edition locally and export a self contained copy.",
+  "keywords": [
+    "ramplab",
+    "react",
+    "onboarding"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./theme": {
+      "types": "./dist/themeControl.d.ts",
+      "default": "./dist/theme.js"
+    },
+    "./roman": {
+      "types": "./dist/roman.d.ts",
+      "default": "./dist/roman.js"
+    },
+    "./brand": {
+      "types": "./dist/BrandMark.d.ts",
+      "default": "./dist/brand.js"
+    },
+    "./loader": {
+      "types": "./dist/JourneyLoader.d.ts",
+      "default": "./dist/loader.js"
+    },
+    "./systemMapLayout": {
+      "types": "./dist/systemMapLayout.d.ts",
+      "default": "./dist/systemMapLayout.js"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@ramplab/spec": "workspace:*",
+    "@shikijs/core": "^3.23.0",
+    "@shikijs/engine-javascript": "^3.23.0",
+    "@shikijs/langs": "^3.23.0",
+    "@shikijs/types": "^3.23.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "jsdom": "^29.1.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.3",
+    "vitest": "^4.1.9"
+  },
+  "peerDependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ramplab/press.git"
+  },
+  "homepage": "https://library.ramplab.dev/cli/",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "pipeline-renderer-fixture",
+  "title": "Pipeline Renderer Fixture",
+  "repo": "ramplab/ramplab",
+  "base": {
+    "modules": [
+      {
+        "id": "doc-validation",
+        "title": "Document Validation",
+        "widgets": [
+          {
+            "id": "validation-pipeline",
+            "type": "pipeline",
+            "title": "Document validation pipeline",
+            "stages": [
+              {
+                "id": "ocr",
+                "label": "OCR / Textract",
+                "description": {
+                  "body": "Extract raw text and key-value pairs from the upload.",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/ocr.ts",
+                      "symbol": "extractText"
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "uploaded document",
+                  "out": "1,240 chars · 14 KV pairs"
+                }
+              },
+              {
+                "id": "classify",
+                "label": "Classify",
+                "description": {
+                  "body": "Decide what kind of document this is.",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/classify.ts",
+                      "symbol": "classifyDocument",
+                      "lines": {
+                        "start": 10,
+                        "end": 42
+                      }
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "raw text",
+                  "out": "passport · conf 0.97"
+                }
+              },
+              {
+                "id": "adequacy",
+                "label": "Adequacy",
+                "flow": {
+                  "out": "name matches ✓"
+                }
+              },
+              {
+                "id": "verdict",
+                "label": "Verdict",
+                "description": {
+                  "body": "The deterministic verdict function has the final word.",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/utils.ts",
+                      "symbol": "determineValidationStatus"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "overlay": []
+}

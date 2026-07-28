@@ -1,0 +1,269 @@
+/* Decision table as a produced figure (Edition): sans controls and rows,
+   verdict carried by semantic state colors, serif explanation. */
+.frame {
+  margin: 56px 0 0;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 8px;
+  font-family: var(--f-ui);
+}
+
+.badge {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+
+.title {
+  font-size: 13px;
+  color: var(--ink3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overlayBadge {
+  margin-left: auto;
+  color: var(--accent);
+  border: 1px solid var(--rule2);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.body {
+  font-family: var(--f-ui);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) minmax(0, 2.4fr);
+  gap: 26px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Inputs: quiet sans controls. */
+.control {
+  margin-bottom: 16px;
+}
+
+.controlLabel {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink2);
+  margin-bottom: 6px;
+}
+
+.chips {
+  display: inline-flex;
+  border: 1px solid var(--rule2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.chips button {
+  font-family: var(--f-ui);
+  font-size: 12px;
+  padding: 4px 14px;
+  color: var(--ink2);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: background var(--t-med), color var(--t-med);
+}
+
+.chips button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.control select {
+  font-family: var(--f-ui);
+  font-size: 12.5px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule2);
+  border-radius: var(--r);
+  padding: 5px 10px;
+  max-width: 100%;
+}
+
+/* Verdict: the outcome plate. */
+.flag {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  border: 1px solid var(--rule2);
+  border-radius: var(--r);
+  background: var(--paper2);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+}
+
+.flag[data-matched='rule'] {
+  border-color: var(--ok);
+  background: var(--ok-wash);
+}
+
+.flag[data-matched='none'] {
+  border-color: var(--bad);
+  background: var(--bad-wash);
+}
+
+.flagIcon {
+  font-size: 15px;
+}
+
+.flagOutcome {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.flagSub {
+  font-size: 12px;
+  color: var(--ink3);
+  margin-top: 2px;
+}
+
+/* The explanation is the author's voice. */
+.explanation {
+  margin: 10px 0 0;
+  font-family: var(--f-body);
+  font-size: 13.5px;
+  color: var(--ink2);
+  max-width: 40em;
+}
+
+.tableLabel {
+  margin: 20px 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+
+.tableLabel small {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink3);
+}
+
+.table {
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.rule {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+  color: var(--ink2);
+  transition: background var(--t-med), opacity var(--t-med);
+}
+
+.rule:last-child {
+  border-bottom: 0;
+}
+
+.rule[data-rule-status='hit'] {
+  background: var(--ok-wash);
+  color: var(--ink);
+}
+
+.rule[data-rule-status='skip'] {
+  opacity: 0.5;
+}
+
+.ruleNumber {
+  flex: 0 0 20px;
+  font-size: 12px;
+  color: var(--ink3);
+  text-align: right;
+}
+
+.rule[data-rule-status='hit'] .ruleNumber {
+  color: var(--ok);
+  font-weight: 700;
+}
+
+.ruleText {
+  flex: 1;
+  min-width: 0;
+}
+
+.ruleText b {
+  color: var(--ink);
+}
+
+.ruleOutcome {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.rule[data-rule-status='hit'] .ruleOutcome {
+  color: var(--ok);
+}
+
+.ruleValue {
+  flex: 0 0 auto;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink3);
+  white-space: nowrap;
+}
+
+.rule[data-rule-status='hit'] .ruleValue {
+  color: var(--ok);
+  font-weight: 600;
+}
+
+.anchors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.anchor {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: var(--ink2);
+  border: 1px solid var(--rule2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  background: var(--paper2);
+  cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+
+.anchor:hover {
+  border-color: var(--ink3);
+  color: var(--ink);
+}

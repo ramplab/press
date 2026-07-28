@@ -1,0 +1,3459 @@
+{
+  "schemaVersion": 1,
+  "id": "reference-lab",
+  "title": "The Reference Lab · Interactive Codebase Onboarding",
+  "base": {
+    "modules": [
+      {
+        "id": "system-overview",
+        "title": "The System, On One Screen",
+        "summary": "The product turns a static TypeScript config into a multi-stage KYB/credit application that external participants fill in, while AI enriches company data, walks ownership trees, and validates documents. This map is the whole product — click any box to see what it does. Each module below teaches one subsystem: interactive playgrounds respond to your changes, walkthrough panels step through actual source line by line, and checkpoints ask you to predict behaviour before moving on; your score persists in this browser.",
+        "widgets": [
+          {
+            "id": "end-to-end-map",
+            "type": "system-map",
+            "title": "The product, end to end",
+            "nodes": [
+              {
+                "id": "participant-wizard",
+                "label": "Participant wizard",
+                "description": "The React wizard external participants fill in. It holds application state in context + hooks and PATCHes deltas to the API — no Redux.",
+                "anchors": [
+                  {
+                    "file": "components/applications/hooks/useApplicationState.ts",
+                    "symbol": "useApplicationState"
+                  }
+                ]
+              },
+              {
+                "id": "rule-engine-mirror",
+                "label": "Rule engine (mirror)",
+                "description": "The identical pure evaluator runs in the browser on every keystroke — same code as the server, so client and server can never disagree about what the form looks like.",
+                "anchors": [
+                  {
+                    "file": "lib/rule-engine/evaluate.ts",
+                    "symbol": "evaluate"
+                  }
+                ]
+              },
+              {
+                "id": "doc-upload",
+                "label": "Doc upload → S3",
+                "description": "Documents go straight to S3 with a presigned PUT; the AI validation pipeline streams progress back to the card over SSE.",
+                "anchors": [
+                  {
+                    "file": "ai/document-validation/utils.ts",
+                    "symbol": "determineValidationStatus"
+                  }
+                ]
+              },
+              {
+                "id": "api-routes",
+                "label": "API routes",
+                "description": "Three kinds of caller, three auth methods: analysts on sessions, participants on link + JWT, partner systems on bearer keys.",
+                "anchors": [
+                  {
+                    "file": "utils/application-participant-auth.ts"
+                  }
+                ]
+              },
+              {
+                "id": "application-service",
+                "label": "application-service",
+                "description": "The transactional spine (~2,800 lines): every create, update, upload, submit, and decision passes through it — lock → guard → merge → recompute → commit → notify.",
+                "anchors": [
+                  {
+                    "file": "lib/application-service.ts"
+                  }
+                ]
+              },
+              {
+                "id": "client-config",
+                "label": "ClientConfig",
+                "description": "A client's entire application as one static config object: fields composed from reusable field-sets, rules, computed values, and a people policy.",
+                "anchors": [
+                  {
+                    "file": "lib/configs/loop-credit.ts"
+                  },
+                  {
+                    "file": "lib/configs/registry.ts"
+                  }
+                ]
+              },
+              {
+                "id": "postgres-jsonb",
+                "label": "Postgres · JSONB",
+                "description": "One JSONB blob per application in the applications.data column — every answer, person, document, and ownership edge.",
+                "anchors": [
+                  {
+                    "file": "lib/types/application-data.ts",
+                    "symbol": "ApplicationData"
+                  }
+                ]
+              },
+              {
+                "id": "ownership-engine",
+                "label": "Ownership engine",
+                "description": "Walks registry ownership trees to find UBOs: credit-bounded exploration, cumulative per-identity math, honest unknowns. Nearly every recent PR is ENG-250.",
+                "anchors": [
+                  {
+                    "file": "lib/company-registry/ownership-graph.ts"
+                  }
+                ]
+              },
+              {
+                "id": "ai-doc-validation",
+                "label": "AI doc validation",
+                "description": "OCR → classify → clarity → adequacy → date rules → verdict. Deterministic code brackets the LLM at both ends.",
+                "anchors": [
+                  {
+                    "file": "ai/document-validation/utils.ts",
+                    "symbol": "determineValidationStatus"
+                  }
+                ]
+              },
+              {
+                "id": "webhooks-slack",
+                "label": "Webhooks · Slack",
+                "description": "Outbound events, QStash-queued and HMAC-signed, always fired after commit — a slow customer endpoint can never block a submit.",
+                "anchors": [
+                  {
+                    "file": "lib/webhook-emit.ts",
+                    "symbol": "emitWebhook"
+                  }
+                ]
+              }
+            ],
+            "edges": [
+              {
+                "from": "participant-wizard",
+                "to": "api-routes",
+                "label": "PATCH / GET / submit",
+                "anchors": [
+                  {
+                    "file": "components/applications/hooks/useApplicationState.ts",
+                    "symbol": "flushSave"
+                  }
+                ]
+              },
+              {
+                "from": "api-routes",
+                "to": "application-service"
+              },
+              {
+                "from": "client-config",
+                "to": "application-service",
+                "label": "rules + fields",
+                "anchors": [
+                  {
+                    "file": "lib/configs/registry.ts"
+                  }
+                ]
+              },
+              {
+                "from": "application-service",
+                "to": "postgres-jsonb"
+              },
+              {
+                "from": "client-config",
+                "to": "rule-engine-mirror",
+                "label": "same config, both sides",
+                "anchors": [
+                  {
+                    "file": "lib/rule-engine/evaluate.ts",
+                    "symbol": "evaluate"
+                  }
+                ]
+              },
+              {
+                "from": "application-service",
+                "to": "ownership-engine",
+                "label": "enrichment (fire & forget)",
+                "anchors": [
+                  {
+                    "file": "lib/application-service.ts",
+                    "symbol": "createApplication"
+                  }
+                ]
+              },
+              {
+                "from": "doc-upload",
+                "to": "ai-doc-validation",
+                "label": "SSE validation",
+                "anchors": [
+                  {
+                    "file": "ai/document-validation/utils.ts"
+                  }
+                ]
+              },
+              {
+                "from": "application-service",
+                "to": "webhooks-slack",
+                "label": "submit / approve events",
+                "anchors": [
+                  {
+                    "file": "lib/webhook-emit.ts",
+                    "symbol": "emitWebhook"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "data-model",
+        "title": "The Data Model",
+        "summary": "An entire application — every answer, person, document, and ownership edge — lives as one JSONB blob in the applications.data column. Learn this one shape and 80% of the codebase becomes legible. Click any key to learn what it does, why it exists, and which code reads it.",
+        "widgets": [
+          {
+            "id": "application-data-explorer",
+            "type": "data-model",
+            "title": "ApplicationData explorer",
+            "source": {
+              "file": "lib/types/application-data.ts",
+              "symbol": "ApplicationData"
+            },
+            "nodes": [
+              {
+                "name": "fields",
+                "type": "Record<fieldId, value>",
+                "annotation": {
+                  "body": "Flat map of every questionnaire answer, keyed by field IDs from the ClientConfig. The rule engine spreads these to the top of its evaluation context.",
+                  "readBy": "Read by: RuleEngine.buildContext(), the wizard's FieldsGrid, webhook payload builders.",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "ApplicationData"
+                    }
+                  ]
+                },
+                "children": [
+                  {
+                    "name": "company_name",
+                    "type": "string",
+                    "example": "Nimbus Retail Ltd",
+                    "annotation": {
+                      "body": "A registry-enriched field — check fieldMeta.company_name: it came from Companies House, not the user. Interpolated into stage names via the {company_name} token.",
+                      "anchors": [
+                        {
+                          "file": "lib/types/field-types.ts",
+                          "symbol": "FieldValueMeta"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "all_owners_added",
+                    "type": "boolean",
+                    "example": true,
+                    "annotation": {
+                      "body": "Legacy ownership attestation. isOwnershipChartConfirmed() only falls back to this when no v2 wizard meta exists (see meta.ownershipWizard).",
+                      "readBy": "Read by: lib/ownership/confirmation.ts.",
+                      "anchors": [
+                        {
+                          "file": "lib/ownership/confirmation.ts",
+                          "symbol": "isOwnershipChartConfirmed"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "people",
+                "type": "Person[]",
+                "annotation": {
+                  "body": "Directors, UBOs, shareholders — one row per human, whatever mix of roles they hold. Person-scoped documents live INSIDE each person, not in the top-level documents map.",
+                  "readBy": "Read by: getActivePeople(), person-scoped rule contexts, the directors/owners stages.",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "Person"
+                    }
+                  ]
+                },
+                "children": [
+                  {
+                    "name": "source",
+                    "type": "PersonSource",
+                    "example": "registry_dismissed",
+                    "annotation": {
+                      "body": "How this person entered the application: registry | user_added | registry_dismissed | contact_fallback. registry_dismissed means a participant \"removed\" them — a SOFT delete that preserves the audit trail.",
+                      "readBy": "Read by: getActivePeople() (filters dismissed rows), activity-log dismissal detectors.",
+                      "anchors": [
+                        {
+                          "file": "lib/types/application-data.ts",
+                          "symbol": "PersonSource"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "roles",
+                    "type": "PersonRole[]",
+                    "annotation": {
+                      "body": "An array because one person can be both director and UBO. Rules address these via derived flags: person.is_director / person.is_ubo.",
+                      "readBy": "Read by: buildPersonContext(), getMissingRequiredRoles().",
+                      "anchors": [
+                        {
+                          "file": "lib/types/application-data.ts",
+                          "symbol": "PersonRole"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "registry_date_of_birth",
+                    "type": "string (YYYY-MM)",
+                    "example": "1984-03",
+                    "annotation": {
+                      "body": "Partial DOB as the registry publishes it. Kept separate from date_of_birth so the user-entered value can be fraud-checked against the registry value.",
+                      "readBy": "Read by: identity cross-checks.",
+                      "anchors": [
+                        {
+                          "file": "lib/types/application-data.ts",
+                          "symbol": "Person"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "documents",
+                    "type": "Record<fieldId, DocumentData>",
+                    "annotation": {
+                      "body": "Person-scoped uploads (passport, proof of address). Company-level docs live at the root documents key instead.",
+                      "readBy": "Read by: completeness checks, the person document cards.",
+                      "anchors": [
+                        {
+                          "file": "lib/types/application-data.ts",
+                          "symbol": "DocumentData"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "confirmed",
+                    "type": "boolean",
+                    "example": false,
+                    "annotation": {
+                      "body": "Participant explicitly reviewed this person. Unconfirmed registry people block stage completion.",
+                      "readBy": "Read by: the directors/owners stage gates.",
+                      "anchors": [
+                        {
+                          "file": "lib/types/application-data.ts",
+                          "symbol": "Person"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "entities",
+                "type": "Entity[]",
+                "annotation": {
+                  "body": "Corporate bodies in the ownership chain (holding companies). People own entities; entities own the target or other entities.",
+                  "readBy": "Read by: the org-chart wizard, ownership graph rendering.",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "Entity"
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "ownership",
+                "type": "OwnershipRelationship[]",
+                "annotation": {
+                  "body": "The directed edges of the ownership graph: owner (person/entity/other) → owned (target/entity), with percentages.",
+                  "readBy": "Written by: buildOwnershipGraph() + the org-chart wizard. Read by: isOwnershipChartConfirmed(), the DAG view.",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "OwnershipRelationship"
+                    }
+                  ]
+                },
+                "children": [
+                  {
+                    "name": "percentage",
+                    "type": "number",
+                    "example": 45,
+                    "annotation": {
+                      "body": "CUMULATIVE effective ownership of the ROOT company — the number the UBO threshold is compared against. 45 here can mean 75% of a holding company that owns 60% of the target.",
+                      "readBy": "Computed by Phase 2 of the ownership engine.",
+                      "anchors": [
+                        {
+                          "file": "lib/company-registry/ownership-graph.ts"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "directPercentage",
+                    "type": "number",
+                    "example": 75,
+                    "annotation": {
+                      "body": "The raw stake at ONE hop (what the registry literally states). Cards show cumulative; DAG edge overlays show direct.",
+                      "readBy": "Read by: org-chart edge labels.",
+                      "anchors": [
+                        {
+                          "file": "lib/types/application-data.ts",
+                          "symbol": "OwnershipRelationship"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "stakeUnknown",
+                    "type": "boolean · ENG-250",
+                    "example": true,
+                    "annotation": {
+                      "body": "The registry listed this holder but stated NO percentage — so percentage is a 0 placeholder. Charts must render \"% unknown\", never \"0%\". Unknown ≠ zero.",
+                      "readBy": "Read by: chart renderers, the remainder reconciler (which refuses to emit a filler row while any stake is unknown).",
+                      "anchors": [
+                        {
+                          "file": "lib/company-registry/ownership-graph.ts"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "registryConfirmed",
+                    "type": "boolean",
+                    "example": true,
+                    "annotation": {
+                      "body": "Org-chart-v2: the participant explicitly Confirmed this registry row. Until then it blocks layer completion. \"Ignore\" is the soft-delete path instead.",
+                      "readBy": "Read by: layer completion checks.",
+                      "anchors": [
+                        {
+                          "file": "lib/types/application-data.ts",
+                          "symbol": "OwnershipRelationship"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "documents",
+                "type": "Record<fieldId, DocumentData>",
+                "annotation": {
+                  "body": "Company-level uploads keyed by the document field's ID. status drives the state machine below; acceptanceReason records WHY it was accepted.",
+                  "readBy": "Written by: confirmDocumentUpload + the validation SSE route.",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "DocumentData"
+                    }
+                  ]
+                },
+                "children": [
+                  {
+                    "name": "status",
+                    "type": "DocumentStatus",
+                    "example": "accepted",
+                    "annotation": {
+                      "body": "One of: pending, validating, accepted, rejected, clarification_needed, forced, skipped. Only accepted/forced/skipped count as complete.",
+                      "readBy": "Read by: completeness checks, the document card UI.",
+                      "anchors": [
+                        {
+                          "file": "lib/types/application-data.ts",
+                          "symbol": "DocumentStatus",
+                          "lines": {
+                            "start": 26,
+                            "end": 26
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "fieldMeta",
+                "type": "Record<fieldId, FieldValueMeta>",
+                "annotation": {
+                  "body": "Provenance for every value in fields: registry | ai_extracted | ai_generated | user_input, plus confidence for the AI sources. Powers the trust badges.",
+                  "readBy": "Read by: the wizard's source badges, analyst review UI.",
+                  "anchors": [
+                    {
+                      "file": "lib/types/field-types.ts",
+                      "symbol": "FieldValueMeta"
+                    }
+                  ]
+                },
+                "children": [
+                  {
+                    "name": "confidence",
+                    "type": "number 0-1",
+                    "example": 0.82,
+                    "annotation": {
+                      "body": "Only present for AI sources. Drives how strongly the UI hints \"verify this\".",
+                      "anchors": [
+                        {
+                          "file": "lib/types/field-types.ts",
+                          "symbol": "FieldValueMeta"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "meta",
+                "type": "ApplicationMeta",
+                "annotation": {
+                  "body": "Enrichment status, wizard progress, adaptive-form adaptations — server-owned state about the application itself.",
+                  "readBy": "Read by: the wizard state machine, isOwnershipChartConfirmed().",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "ApplicationMeta"
+                    }
+                  ]
+                },
+                "children": [
+                  {
+                    "name": "ownershipWizard",
+                    "type": "object",
+                    "annotation": {
+                      "body": "v2 org-chart wizard state. When present it is AUTHORITATIVE over the legacy all_owners_added field — a present-but-unconfirmed wizard is not overridden by a stale attestation.",
+                      "readBy": "Read by: lib/ownership/confirmation.ts.",
+                      "anchors": [
+                        {
+                          "file": "lib/ownership/confirmation.ts",
+                          "symbol": "isOwnershipChartConfirmed"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "why-one-jsonb-blob",
+            "type": "callout",
+            "kind": "why",
+            "title": "Why one JSONB blob?",
+            "body": "A KYB form's shape is entirely config-driven and varies per client — a relational schema would need a migration for every new field. Storing answers as JSON lets one table serve every config. The trade-off: no SQL-level querying of answers, so the rule engine queries it in memory instead.",
+            "anchors": [
+              {
+                "file": "lib/types/application-data.ts",
+                "symbol": "ApplicationData"
+              }
+            ]
+          },
+          {
+            "id": "document-status-machine",
+            "type": "state-machine",
+            "title": "DocumentStatus state machine",
+            "states": [
+              {
+                "id": "pending",
+                "label": "pending",
+                "description": {
+                  "body": "Just uploaded and confirmed into S3 + the JSONB. If the field has no validator configured, it skips straight to accepted with acceptanceReason \"no_validator_configured\". Otherwise the wizard opens the SSE validation stream.",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "DocumentStatus",
+                      "lines": {
+                        "start": 26,
+                        "end": 26
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "validating",
+                "label": "validating",
+                "description": {
+                  "body": "The AI pipeline is running (see the Document Validation module): OCR → classify → clarity → adequacy → date rules. Progress streams to the card's ring at 10% / 50% / 75% / 90%.",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/utils.ts"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "accepted",
+                "label": "accepted",
+                "description": {
+                  "body": "✓ counts as complete. Reached by validation passing (acceptanceReason \"validation_passed\"), by having no validator, or by the participant accepting a soft-fail.",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "DocumentStatus"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "clarification-needed",
+                "label": "clarification_needed",
+                "description": {
+                  "body": "Passed with doubts (soft fail): moderate confidence, unexpected doc type, or missing fields. The participant can accept anyway or retry.",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/utils.ts",
+                      "symbol": "determineValidationStatus"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "rejected",
+                "label": "rejected",
+                "description": {
+                  "body": "A hard validation fail (unknown doc type, critical clarity, name mismatch, confidence < 0.5). The participant must re-upload; each re-upload restarts at pending.",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/utils.ts",
+                      "symbol": "determineValidationStatus"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "forced",
+                "label": "forced",
+                "description": {
+                  "body": "✓ counts as complete. A human override: the participant/compliance accepted despite a failure, recording a userOverrideReason for the audit trail.",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "DocumentStatus"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "skipped",
+                "label": "skipped",
+                "description": {
+                  "body": "✓ counts as complete. The participant skipped collection where rules allow, with a recorded reason.",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "DocumentStatus"
+                    }
+                  ]
+                }
+              }
+            ],
+            "transitions": [
+              {
+                "from": "pending",
+                "to": "validating",
+                "trigger": "SSE opens"
+              },
+              {
+                "from": "validating",
+                "to": "accepted",
+                "trigger": "PASSED",
+                "commentary": {
+                  "body": "Validation passed: the document is stamped accepted with acceptanceReason \"validation_passed\", and extracted identity fields auto-populate the person record.",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/utils.ts",
+                      "symbol": "determineValidationStatus"
+                    }
+                  ]
+                }
+              },
+              {
+                "from": "validating",
+                "to": "clarification-needed",
+                "trigger": "NEEDS_REVIEW"
+              },
+              {
+                "from": "validating",
+                "to": "rejected",
+                "trigger": "FAILED"
+              },
+              {
+                "from": "clarification-needed",
+                "to": "accepted",
+                "trigger": "accept anyway"
+              },
+              {
+                "from": "rejected",
+                "to": "pending",
+                "trigger": "re-upload",
+                "commentary": {
+                  "body": "Each re-upload restarts the machine at pending — there is no shortcut around validation.",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "DocumentStatus"
+                    }
+                  ]
+                }
+              },
+              {
+                "from": "rejected",
+                "to": "forced",
+                "trigger": "override"
+              },
+              {
+                "from": "clarification-needed",
+                "to": "forced",
+                "trigger": "override"
+              },
+              {
+                "from": "pending",
+                "to": "skipped",
+                "trigger": "skip (when rules allow)"
+              }
+            ]
+          },
+          {
+            "id": "completeness-rule",
+            "type": "callout",
+            "kind": "why",
+            "title": "The rule that matters",
+            "body": "Completeness only counts a document done when it's accepted, forced, or skipped. Everything else blocks submit.",
+            "anchors": [
+              {
+                "file": "lib/types/application-data.ts",
+                "symbol": "DocumentStatus"
+              }
+            ]
+          },
+          {
+            "id": "field-value-meta-figure",
+            "type": "code-figure",
+            "code": [
+              "export interface FieldValueMeta {",
+              "  source: 'registry' | 'ai_extracted' | 'ai_generated' | 'user_input';",
+              "  confidence?: number;    // 0-1, only for AI sources",
+              "  sourceDetail?: string;  // \"Companies House\", \"acme.com\", \"Claude Sonnet\"",
+              "  timestamp: string;",
+              "}"
+            ],
+            "source": {
+              "file": "lib/types/field-types.ts",
+              "symbol": "FieldValueMeta",
+              "lines": {
+                "start": 276,
+                "end": 281
+              }
+            },
+            "highlight": {
+              "start": 2,
+              "end": 2
+            },
+            "caption": {
+              "body": "Provenance: every value knows where it came from. For each value in fields, a parallel entry in fieldMeta records its source — this powers the trust badges in the UI and decides what an analyst double-checks.",
+              "anchors": [
+                {
+                  "file": "lib/types/field-types.ts",
+                  "symbol": "FieldValueMeta",
+                  "lines": {
+                    "start": 276,
+                    "end": 281
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "soft-delete-gotcha",
+            "type": "callout",
+            "kind": "warning",
+            "title": "Gotcha you will hit in week one",
+            "body": "Registry-supplied people and ownership rows are never hard-deleted by participants — \"removing\" one flips its source to registry_dismissed (a soft-delete that preserves the audit trail). That's why getActivePeople() / getActiveOwnership() wrap data.people / data.ownership everywhere. Forget the wrapper and dismissed rows reappear.",
+            "anchors": [
+              {
+                "file": "lib/types/application-data.ts",
+                "symbol": "getActivePeople"
+              }
+            ]
+          },
+          {
+            "id": "data-model-checkpoint",
+            "type": "quiz",
+            "title": "Checkpoint — the data model",
+            "questions": [
+              {
+                "id": "registry-dismissal",
+                "prompt": "A participant clicks \"remove\" on a director that came from the company registry. What happens to that Person row?",
+                "options": [
+                  {
+                    "id": "hard-delete",
+                    "label": "It is deleted from the people array"
+                  },
+                  {
+                    "id": "soft-delete",
+                    "label": "Its source flips to registry_dismissed — the row stays in the JSONB for the audit trail and is filtered out by getActivePeople()"
+                  },
+                  {
+                    "id": "confirmed-false",
+                    "label": "Its confirmed flag is set to false"
+                  },
+                  {
+                    "id": "moved-to-entities",
+                    "label": "It is moved into the entities array"
+                  }
+                ],
+                "correctOptionId": "soft-delete",
+                "explanation": {
+                  "body": "Registry-supplied rows are soft-deleted. Regulators care why a registry-supplied person disappeared, so the row survives with a dismissed source, an activity-log entry is written, and every consumer filters through getActivePeople().",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "PersonSource"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "complete-statuses",
+                "prompt": "Which document statuses count as \"complete\" when checking whether the application can be submitted?",
+                "options": [
+                  {
+                    "id": "only-accepted",
+                    "label": "Only accepted"
+                  },
+                  {
+                    "id": "accepted-clarification",
+                    "label": "accepted and clarification_needed"
+                  },
+                  {
+                    "id": "accepted-forced-skipped",
+                    "label": "accepted, forced, and skipped"
+                  },
+                  {
+                    "id": "not-rejected",
+                    "label": "Anything that is not rejected"
+                  }
+                ],
+                "correctOptionId": "accepted-forced-skipped",
+                "explanation": {
+                  "body": "A compliance override (forced) and an allowed skip both satisfy completeness. clarification_needed is a soft fail — the participant must accept-anyway or re-upload before submit unblocks.",
+                  "anchors": [
+                    {
+                      "file": "lib/types/application-data.ts",
+                      "symbol": "DocumentStatus"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "where-this-shape-flows",
+            "type": "callout",
+            "kind": "connects-to",
+            "title": "Where this shape flows",
+            "body": "The wizard (Autosave module) holds it in React state and PATCHes deltas; application-service (Lifecycle module) merges those deltas under a row lock; the rule engine evaluates against it; the ownership engine writes the ownership array and its ENG-250 markers.",
+            "anchors": [
+              {
+                "file": "lib/application-service.ts",
+                "symbol": "participantUpdateApplicationData"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "config-to-wizard",
+        "title": "Config → Wizard",
+        "summary": "Nobody builds these forms by writing JSX. A client's entire application is a static ClientConfig object — fields composed from reusable field-sets, rules, computed values, and a people policy. At render time deriveStages() turns config + current answers into the wizard. The playground below runs the same visibility rules the real derivation uses.",
+        "widgets": [
+          {
+            "id": "field-visibility-playground",
+            "type": "decision-table",
+            "title": "Stage derivation playground — does the field render?",
+            "inputs": [
+              {
+                "id": "field",
+                "label": "Which field are we deciding about?",
+                "type": "select",
+                "options": [
+                  {
+                    "value": "inventory-storage",
+                    "label": "inventory_storage (Company stage)"
+                  },
+                  {
+                    "value": "monthly-churn-rate",
+                    "label": "monthly_churn_rate (Financials stage)"
+                  }
+                ],
+                "default": "inventory-storage"
+              },
+              {
+                "id": "industry",
+                "label": "Industry",
+                "type": "select",
+                "options": [
+                  {
+                    "value": "not-answered",
+                    "label": "— not answered —"
+                  },
+                  {
+                    "value": "retail",
+                    "label": "Retail"
+                  },
+                  {
+                    "value": "wholesale",
+                    "label": "Wholesale"
+                  },
+                  {
+                    "value": "saas",
+                    "label": "SaaS"
+                  },
+                  {
+                    "value": "services",
+                    "label": "Professional services"
+                  }
+                ],
+                "default": "retail"
+              },
+              {
+                "id": "business-model",
+                "label": "Business model",
+                "type": "select",
+                "options": [
+                  {
+                    "value": "b2c-one-time",
+                    "label": "B2C (One-Time Purchases)"
+                  },
+                  {
+                    "value": "b2c-subscription",
+                    "label": "B2C (Subscriptions)"
+                  },
+                  {
+                    "value": "b2b-contracted",
+                    "label": "B2B (Recurring And Contracted)"
+                  }
+                ],
+                "default": "b2b-contracted"
+              }
+            ],
+            "rules": [
+              {
+                "when": [
+                  {
+                    "input": "field",
+                    "equals": "inventory-storage"
+                  },
+                  {
+                    "input": "industry",
+                    "equals": "retail"
+                  }
+                ],
+                "outcome": "visible — industry matched its `or` rule",
+                "explanation": {
+                  "body": "inventory_storage carries a visible rule: or [industry eq retail, industry eq wholesale]. Retail matches the first branch, so the field renders in the company stage.",
+                  "anchors": [
+                    {
+                      "file": "lib/configs/loop-credit.ts"
+                    },
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "evaluate"
+                    }
+                  ]
+                }
+              },
+              {
+                "when": [
+                  {
+                    "input": "field",
+                    "equals": "inventory-storage"
+                  },
+                  {
+                    "input": "industry",
+                    "equals": "wholesale"
+                  }
+                ],
+                "outcome": "visible — industry matched its `or` rule",
+                "explanation": {
+                  "body": "Wholesale matches the second branch of the same or rule — the field renders either way.",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "evaluate"
+                    }
+                  ]
+                }
+              },
+              {
+                "when": [
+                  {
+                    "input": "field",
+                    "equals": "inventory-storage"
+                  }
+                ],
+                "outcome": "hidden — the rule needs industry ∈ {retail, wholesale}",
+                "explanation": {
+                  "body": "Pick SaaS and inventory_storage vanishes from the company stage. A hidden field's stale value is also cleared client-side (see the Autosave module), so it never wrongly satisfies a requirement.",
+                  "anchors": [
+                    {
+                      "file": "lib/stages/derive-stages.ts",
+                      "symbol": "deriveStages"
+                    }
+                  ]
+                }
+              },
+              {
+                "when": [
+                  {
+                    "input": "field",
+                    "equals": "monthly-churn-rate"
+                  },
+                  {
+                    "input": "business-model",
+                    "equals": "b2c-subscription"
+                  }
+                ],
+                "outcome": "visible — churn appears in Financials",
+                "explanation": {
+                  "body": "monthly_churn_rate's rule is business_model eq B2C_SUBSCRIPTION. Set the business model to subscriptions and the field pops into the Financials stage.",
+                  "anchors": [
+                    {
+                      "file": "lib/configs/loop-credit.ts"
+                    }
+                  ]
+                }
+              },
+              {
+                "when": [
+                  {
+                    "input": "field",
+                    "equals": "monthly-churn-rate"
+                  }
+                ],
+                "outcome": "hidden — only subscription businesses report churn",
+                "explanation": {
+                  "body": "Any other business model leaves the churn field hidden; a stage whose fields were all hidden by rules simply doesn't appear in the wizard.",
+                  "anchors": [
+                    {
+                      "file": "lib/stages/derive-stages.ts",
+                      "symbol": "deriveStages"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "derive-stages-walkthrough",
+            "type": "code-walkthrough",
+            "title": "How that works — the real derivation, stepped through",
+            "code": [
+              "export function deriveStages(config, context, engine?) {",
+              "  const ruleEngine = engine ?? new RuleEngine(config);",
+              "  const order = config.stageOrder ?? CATEGORY_ORDER;",
+              "  const stages = [];",
+              "",
+              "  for (const category of order) {",
+              "    const categoryFields = Object.entries(config.fields)",
+              "      .map(([id, field], idx) => ({ id, field, idx }))",
+              "      .filter(({ field }) => field.category === category)",
+              "      .sort((a, b) => (a.field.position ?? a.idx) - (b.field.position ?? b.idx))",
+              "      .map(({ id, field }) => ({ id, ...field, visible: ruleEngine.isVisible(id, context) }));",
+              "",
+              "    const hasVisibleFields = categoryFields.some(f => f.visible);",
+              "",
+              "    if (category === 'directors' && !config.people.collectDirectors) continue;",
+              "    if (category === 'owners' && !config.people.collectUBOs) continue;",
+              "",
+              "    if (!hasVisibleFields && category !== 'directors' && category !== 'owners') continue;",
+              "",
+              "    const rawName = config.stageNames?.[category] ?? CATEGORY_NAMES[category];",
+              "    const name = interpolateTokens(rawName, context, config);",
+              "",
+              "    stages.push({ id: category, name, fields: categoryFields });",
+              "  }",
+              "  return stages;",
+              "}"
+            ],
+            "source": {
+              "file": "lib/stages/derive-stages.ts",
+              "symbol": "deriveStages",
+              "lines": {
+                "start": 59,
+                "end": 84
+              }
+            },
+            "steps": [
+              {
+                "lines": {
+                  "start": 1,
+                  "end": 4
+                },
+                "commentary": {
+                  "body": "Config + current answers in, wizard out. The loop order comes from stageOrder if the config declares one (this client does: company → questionnaire → owners), else a default category order. Note this function is pure — it runs identically in the browser (per keystroke) and on the server (before submit).",
+                  "anchors": [
+                    {
+                      "file": "lib/stages/derive-stages.ts",
+                      "symbol": "deriveStages"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 6,
+                  "end": 11
+                },
+                "commentary": {
+                  "body": "Per category: collect the fields whose category matches, sort by position (the 10/20/30 gaps exist so you can insert between later), and stamp each with a live isVisible() verdict — that call is the rule engine, next module.",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "isVisible"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 13,
+                  "end": 13
+                },
+                "commentary": {
+                  "body": "One boolean decides whether this category deserves to exist as a stage: does it have at least one visible field right now?",
+                  "anchors": [
+                    {
+                      "file": "lib/stages/derive-stages.ts",
+                      "symbol": "deriveStages"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 15,
+                  "end": 16
+                },
+                "commentary": {
+                  "body": "People stages are policy-gated, not field-gated: no collectDirectors → no directors stage, ever — even if director fields exist in the config.",
+                  "anchors": [
+                    {
+                      "file": "lib/stages/derive-stages.ts",
+                      "symbol": "deriveStages"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 18,
+                  "end": 18
+                },
+                "commentary": {
+                  "body": "Empty non-people stages are skipped entirely. A stage whose fields were all hidden by rules simply doesn't appear in the wizard — no greyed-out tabs, no placeholder.",
+                  "anchors": [
+                    {
+                      "file": "lib/stages/derive-stages.ts",
+                      "symbol": "deriveStages"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 20,
+                  "end": 21
+                },
+                "commentary": {
+                  "body": "Stage names support tokens: this client names its first stage {company_name}, so the tab literally shows the applicant's company.",
+                  "anchors": [
+                    {
+                      "file": "lib/stages/derive-stages.ts",
+                      "symbol": "interpolateTokens"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 23,
+                  "end": 26
+                },
+                "commentary": {
+                  "body": "The result drives the tab strip, the progress ring, and — server-side inside getApplicationState() — the submit validation. One derivation, two runtimes, zero drift.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "getApplicationState"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "config-composition-figure",
+            "type": "code-figure",
+            "code": [
+              "  fields: {",
+              "    credit_limit_requested: { /* client-specific */ },",
+              "    ...baseCompanyFields,                    // shared: name, number, address...",
+              "    ...caCompanyExtensions,                  // country extension pack",
+              "    company_country: buildCountryField(ALLOWED_COUNTRIES, ['CA', 'US']),",
+              "    // override — relabel a base field without redefining it:",
+              "    registered_address: { ...baseCompanyFields.registered_address, label: 'HQ Address' },",
+              "  },"
+            ],
+            "source": {
+              "file": "lib/configs/loop-credit.ts",
+              "lines": {
+                "start": 286,
+                "end": 293
+              }
+            },
+            "highlight": {
+              "start": 7,
+              "end": 7
+            },
+            "caption": {
+              "body": "The composition trick: configs stay DRY by spreading shared field-sets and overriding only what differs. To add a field for one client, add it to that config. To add it for every client, add it to the field-set in lib/field-sets/. Configs are registered once at startup and resolved per-org at request time.",
+              "anchors": [
+                {
+                  "file": "lib/configs/registry.ts"
+                }
+              ]
+            }
+          },
+          {
+            "id": "config-checkpoint",
+            "type": "quiz",
+            "title": "Checkpoint — config → wizard",
+            "questions": [
+              {
+                "id": "directors-stage",
+                "prompt": "A config has collectDirectors: false. Someone adds a field with category: \"directors\" to its fields map. What renders?",
+                "options": [
+                  {
+                    "id": "just-that-field",
+                    "label": "A directors stage containing just that field"
+                  },
+                  {
+                    "id": "no-stage",
+                    "label": "No directors stage at all — a people stage needs the people policy to collect it AND the category to be in stageOrder"
+                  },
+                  {
+                    "id": "company-fallback",
+                    "label": "The field falls back into the company stage"
+                  },
+                  {
+                    "id": "runtime-error",
+                    "label": "A runtime error when the config registers"
+                  }
+                ],
+                "correctOptionId": "no-stage",
+                "explanation": {
+                  "body": "deriveStages() skips directors whenever config.people.collectDirectors is false, and this client's stageOrder (company, questionnaire, owners) doesn't even include it. The field simply never renders.",
+                  "anchors": [
+                    {
+                      "file": "lib/stages/derive-stages.ts",
+                      "symbol": "deriveStages"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "no-rule-defaults",
+                "prompt": "A field has no rule at all in config.rules. It is…",
+                "options": [
+                  {
+                    "id": "hidden-until-rule",
+                    "label": "Hidden until a rule makes it visible"
+                  },
+                  {
+                    "id": "visible-not-required",
+                    "label": "Visible, and not required"
+                  },
+                  {
+                    "id": "visible-required",
+                    "label": "Visible and required"
+                  },
+                  {
+                    "id": "required-if-staged",
+                    "label": "Required only if its category is in stageOrder"
+                  }
+                ],
+                "correctOptionId": "visible-not-required",
+                "explanation": {
+                  "body": "The defaults live in isVisible()/isRequired(): no rule → visible, not required. That's why most fields need no rule at all.",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "isVisible"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "connects-to-rule-engine",
+            "type": "callout",
+            "kind": "connects-to",
+            "title": "Connects forward",
+            "body": "The isVisible() call inside deriveStages() is the rule engine — next module. On the client it's memoized by useStageDerivation; on the server the same function runs inside getApplicationState() before submit, so client and server can never disagree about what the form looks like.",
+            "anchors": [
+              {
+                "file": "lib/rule-engine/evaluate.ts",
+                "symbol": "evaluate"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "rule-engine",
+        "title": "The Rule Engine",
+        "summary": "A ~120-line pure JSON-predicate evaluator is the brain of the product: it decides what's visible, what's required, and what still blocks submit — identically in the browser and on the server. The playground below mirrors the real six-case \"personal guarantee\" decision table. Fill the form like an applicant; watch the logic think.",
+        "widgets": [
+          {
+            "id": "personal-guarantee-table",
+            "type": "decision-table",
+            "title": "Rule playground — \"needs personal guarantee\"",
+            "inputs": [
+              {
+                "id": "time-in-business",
+                "label": "Time in business",
+                "type": "select",
+                "options": [
+                  {
+                    "value": "under-3-years",
+                    "label": "Under 3 years"
+                  },
+                  {
+                    "value": "3-plus-years",
+                    "label": "3+ years"
+                  }
+                ],
+                "default": "3-plus-years"
+              },
+              {
+                "id": "adjusted-gross-income",
+                "label": "computed.adjusted_gross_income (revenue × margin)",
+                "type": "select",
+                "options": [
+                  {
+                    "value": "under-5m",
+                    "label": "Under $5M"
+                  },
+                  {
+                    "value": "5m-plus",
+                    "label": "$5M or more"
+                  }
+                ],
+                "default": "5m-plus"
+              },
+              {
+                "id": "is-profitable",
+                "label": "Is the business currently profitable?",
+                "type": "boolean",
+                "default": true
+              },
+              {
+                "id": "pays-in-full",
+                "label": "Months/year the card balance is paid in full",
+                "type": "select",
+                "options": [
+                  {
+                    "value": "all-12",
+                    "label": "12 Months (All)"
+                  },
+                  {
+                    "value": "fewer-than-12",
+                    "label": "Fewer than 12"
+                  }
+                ],
+                "default": "all-12"
+              },
+              {
+                "id": "limit-over-quarter-revenue",
+                "label": "Credit limit requested > 25% of gross revenue?",
+                "type": "boolean",
+                "default": false
+              },
+              {
+                "id": "debt-over-4x-income",
+                "label": "Total debt > 4× net income?",
+                "type": "boolean",
+                "default": false
+              }
+            ],
+            "rules": [
+              {
+                "when": [
+                  {
+                    "input": "time-in-business",
+                    "equals": "under-3-years"
+                  }
+                ],
+                "outcome": "needs_personal_guarantee = true",
+                "explanation": {
+                  "body": "Case 1 — time in business < 3 years: operations_start_date within 3 years of today, checked with dateWithinYears against a UTC-midnight cutoff.",
+                  "anchors": [
+                    {
+                      "file": "lib/configs/loop-credit.ts",
+                      "lines": {
+                        "start": 585,
+                        "end": 585
+                      }
+                    },
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "evaluate"
+                    }
+                  ]
+                }
+              },
+              {
+                "when": [
+                  {
+                    "input": "adjusted-gross-income",
+                    "equals": "under-5m"
+                  }
+                ],
+                "outcome": "needs_personal_guarantee = true",
+                "explanation": {
+                  "body": "Case 2 — computed.adjusted_gross_income < $5,000,000. The arithmetic computed value (gross_revenue_12m × gross_profit_margin × 0.01) runs first and feeds this comparison: an arithmetic computed value feeding a decision table.",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "computeValue"
+                    }
+                  ]
+                }
+              },
+              {
+                "when": [
+                  {
+                    "input": "is-profitable",
+                    "equals": false
+                  }
+                ],
+                "outcome": "needs_personal_guarantee = true",
+                "explanation": {
+                  "body": "Case 3 — the business is not profitable: is_profitable === false.",
+                  "anchors": [
+                    {
+                      "file": "lib/configs/loop-credit.ts",
+                      "lines": {
+                        "start": 585,
+                        "end": 585
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "when": [
+                  {
+                    "input": "pays-in-full",
+                    "equals": "fewer-than-12"
+                  }
+                ],
+                "outcome": "needs_personal_guarantee = true",
+                "explanation": {
+                  "body": "Case 4 — doesn't pay the balance in full all 12 months: months_pay_in_full exists AND ≠ \"12\". An unanswered question never satisfies a rule.",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "evaluate"
+                    }
+                  ]
+                }
+              },
+              {
+                "when": [
+                  {
+                    "input": "limit-over-quarter-revenue",
+                    "equals": true
+                  }
+                ],
+                "outcome": "needs_personal_guarantee = true",
+                "explanation": {
+                  "body": "Case 5 — a cross-field valueRef comparison: credit_limit_requested > gross_revenue_12m × factor 0.25. Both sides must be numbers or the condition bails false.",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "evaluate"
+                    }
+                  ]
+                }
+              },
+              {
+                "when": [
+                  {
+                    "input": "debt-over-4x-income",
+                    "equals": true
+                  }
+                ],
+                "outcome": "needs_personal_guarantee = true",
+                "explanation": {
+                  "body": "Case 6 — debt > 4× net income: total_debt_outstanding > net_income_last_year × factor 4, the second valueRef case in the table.",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "evaluate"
+                    }
+                  ]
+                }
+              }
+            ],
+            "defaultOutcome": {
+              "outcome": "needs_personal_guarantee = false",
+              "explanation": {
+                "body": "No case matched → the computed value's default (false) applies. Guarantor fields stay hidden — and cleared — for every person.",
+                "anchors": [
+                  {
+                    "file": "lib/configs/loop-credit.ts",
+                    "lines": {
+                      "start": 585,
+                      "end": 585
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "person-scoped-fields",
+            "type": "callout",
+            "kind": "why",
+            "title": "Person-scoped fields",
+            "body": "Guarantor fields (real estate owned, personal tax return, credit check consent) are person-scoped: their rule is person.is_ubo AND computed.needs_personal_guarantee. When the flag flips they pop in — visible and required — for a UBO, but never for a director-only person. Person-scoped requirement checks loop every active person with a person.* context.",
+            "anchors": [
+              {
+                "file": "lib/rule-engine/evaluate.ts",
+                "symbol": "evaluate"
+              }
+            ]
+          },
+          {
+            "id": "evaluate-walkthrough",
+            "type": "code-walkthrough",
+            "title": "Inside evaluate() — one recursion, the whole language",
+            "code": [
+              "export function evaluate(condition: Condition, ctx: RuleContext): boolean {",
+              "  if (condition === true) return true;",
+              "  if (condition === false) return false;",
+              "",
+              "  if ('and' in condition) return condition.and.every((c) => evaluate(c, ctx));",
+              "  if ('or' in condition)  return condition.or.some((c) => evaluate(c, ctx));",
+              "  if ('not' in condition) return !evaluate(condition.not, ctx);",
+              "",
+              "  const actual = resolve(condition.ref, ctx);",
+              "",
+              "  if ('valueRef' in condition) {",
+              "    const refVal = resolve(condition.valueRef, ctx);",
+              "    if (typeof actual !== 'number' || typeof refVal !== 'number') return false;",
+              "    const target = condition.factor != null ? refVal * condition.factor : refVal;",
+              "    switch (condition.op) {",
+              "      case 'gt':  return actual > target;",
+              "      case 'gte': return actual >= target;",
+              "      case 'lt':  return actual < target;",
+              "      case 'lte': return actual <= target;",
+              "      default:    return false;",
+              "    }",
+              "  }",
+              "",
+              "  switch (condition.op) {",
+              "    case 'eq':  return actual === condition.value;",
+              "    // ...neq / gt / in / contains / dateWithinYears / isNull / exists...",
+              "  }",
+              "}"
+            ],
+            "source": {
+              "file": "lib/rule-engine/evaluate.ts",
+              "symbol": "evaluate",
+              "lines": {
+                "start": 28,
+                "end": 55
+              }
+            },
+            "steps": [
+              {
+                "lines": {
+                  "start": 1,
+                  "end": 1
+                },
+                "commentary": {
+                  "body": "Trace case 5 of the personal-guarantee table: { ref: \"credit_limit_requested\", op: \"gt\", valueRef: \"gross_revenue_12m\", factor: 0.25 } — with limit $1M and revenue $22M. The ctx is the flattened data: field values at the top level, plus computed.* and (for person fields) person.* namespaces.",
+                  "anchors": [
+                    {
+                      "file": "lib/configs/loop-credit.ts",
+                      "lines": {
+                        "start": 585,
+                        "end": 585
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 2,
+                  "end": 3
+                },
+                "commentary": {
+                  "body": "Literal escape hatch first. This is how a config hard-hides a field: { field: \"legal_entity_type\", visible: false } — the condition IS the boolean.",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "evaluate"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 5,
+                  "end": 7
+                },
+                "commentary": {
+                  "body": "The compound layer is just recursion: and = every, or = some, not = negate. That's the entire boolean algebra of the product — no parser, no DSL strings, just structured JSON all the way down. (Not our case today; case 5 is a leaf.)",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "evaluate"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 9,
+                  "end": 9
+                },
+                "commentary": {
+                  "body": "resolve(\"credit_limit_requested\", ctx) walks the dotted path → 1,000,000. A missing key resolves to undefined, which every operator treats as falsy — unanswered questions never satisfy a rule.",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "resolve"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 11,
+                  "end": 14
+                },
+                "commentary": {
+                  "body": "Case 5 has a valueRef, so we're comparing two fields: resolve gross_revenue_12m → 22,000,000. Both must be numbers (or bail false). Then target = 22,000,000 × 0.25 = 5,500,000.",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "evaluate"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 16,
+                  "end": 16
+                },
+                "commentary": {
+                  "body": "op: \"gt\" → is 1,000,000 > 5,500,000? No — case 5 misses, and the decision table moves on to case 6. Push the credit limit past $5.5M in the playground and watch this exact line flip the case green.",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "evaluate"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 24,
+                  "end": 26
+                },
+                "commentary": {
+                  "body": "Every non-valueRef leaf lands in this switch — equality, ranges, set membership, date windows, existence. ~40 lines encode the entire condition language, which is why the whole engine stays trivially testable and can run on every keystroke.",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "evaluate"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "why-pure-functions",
+            "type": "callout",
+            "kind": "why",
+            "title": "Why pure functions matter here",
+            "body": "The engine has no I/O and no side effects, so the identical code runs on every keystroke in the browser AND inside submitApplication() on the server. The client literally cannot submit something the server would reject — they share one brain. The defaults also matter: a field with no rule is visible and not required, so most fields need no rule at all.",
+            "anchors": [
+              {
+                "file": "lib/rule-engine/evaluate.ts",
+                "symbol": "evaluate"
+              }
+            ]
+          },
+          {
+            "id": "rule-engine-checkpoint",
+            "type": "quiz",
+            "title": "Checkpoint — the rule engine",
+            "questions": [
+              {
+                "id": "stale-value-cleared",
+                "prompt": "The applicant picked retail, filled inventory_storage, then switches industry to saas. What actually happens to that stored value?",
+                "options": [
+                  {
+                    "id": "stays-silently",
+                    "label": "The field hides but the value stays in data.fields silently"
+                  },
+                  {
+                    "id": "cleared-to-null",
+                    "label": "The field hides AND the client clears the stale value to null, so it never reaches the server"
+                  },
+                  {
+                    "id": "stays-visible",
+                    "label": "The field stays visible until the next save completes"
+                  },
+                  {
+                    "id": "server-rejects",
+                    "label": "The server rejects the next PATCH as inconsistent"
+                  }
+                ],
+                "correctOptionId": "cleared-to-null",
+                "explanation": {
+                  "body": "visibilityAwareUpdateField re-evaluates every field's visibility after each change (with recomputed computed values) and nulls anything that just went invisible — otherwise the stale value could satisfy a requirement or leak into a webhook.",
+                  "anchors": [
+                    {
+                      "file": "components/applications/hooks/useApplicationState.ts",
+                      "symbol": "visibilityAwareUpdateField"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "predict-the-engine",
+                "prompt": "Predict the engine: operations started 10 years ago, revenue $30M, margin 10%, profitable, pays in full all 12 months, limit $1M, debt $0, net income $2M. Which personal-guarantee case fires?",
+                "options": [
+                  {
+                    "id": "case-1-time",
+                    "label": "Case 1 — time in business"
+                  },
+                  {
+                    "id": "case-2-agi",
+                    "label": "Case 2 — adjusted_gross_income = 30M × 0.10 = $3M, which is < $5M"
+                  },
+                  {
+                    "id": "case-5-limit",
+                    "label": "Case 5 — the credit limit is too high vs revenue"
+                  },
+                  {
+                    "id": "no-case",
+                    "label": "No case fires — needs_personal_guarantee is false"
+                  }
+                ],
+                "correctOptionId": "case-2-agi",
+                "explanation": {
+                  "body": "The arithmetic computed value runs first: 30,000,000 × 10 × 0.01 = 3,000,000. Case 1 needs < 3 years (no), case 2 compares computed.adjusted_gross_income < 5,000,000 → true. First match wins; later cases aren't even evaluated.",
+                  "anchors": [
+                    {
+                      "file": "lib/rule-engine/evaluate.ts",
+                      "symbol": "computeValue"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "one-more-consumer",
+            "type": "callout",
+            "kind": "connects-to",
+            "title": "One more consumer",
+            "body": "getMissingRequirements() walks every visible+required field with no value — the invariant being invisible fields never block submission. Its person-scoped sibling loops every active person with a person.* context.",
+            "anchors": [
+              {
+                "file": "lib/rule-engine/evaluate.ts",
+                "symbol": "isRequired"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ownership-eng-250",
+        "title": "Ownership — ENG-250",
+        "summary": "Nearly every recent PR is ENG-250: find who ultimately owns a company — the UBO — through layers of holding companies, spending as few paid registry credits as possible, and never fabricating data. The engine's load-bearing rule: Phase 1 explores, only Phase 3 prunes. The classic trap that rule exists for is a diamond: an owner who is sub-threshold on every individual path but over the threshold in total.",
+        "widgets": [
+          {
+            "id": "three-phase-engine",
+            "type": "pipeline",
+            "title": "Three-phase engine trace — explore, cumulate, render",
+            "stages": [
+              {
+                "id": "explore",
+                "label": "Phase 1 · Explore",
+                "description": {
+                  "body": "A credit-bounded, heaviest-first frontier walk. Every shareholder becomes an occurrence — even ones that look hopelessly small on this path — and corporate parents earn a paid registry fetch only through the budget's single charge() chokepoint. Conspicuously absent: any effective-% threshold check.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "target company (root, 100%)",
+                  "out": "occurrences + fetched layers"
+                }
+              },
+              {
+                "id": "cumulate",
+                "label": "Phase 2 · Cumulate",
+                "description": {
+                  "body": "A pure per-identity summation — diamond aggregation. 9% via one path plus 10% via another is 19%, and at a 15% threshold that's a UBO. Identity is keyed on registration number + country, never display name. One unknown occurrence means the entity can never be proven sub-threshold.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts"
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "occurrences",
+                  "out": "cumulative % per identity"
+                }
+              },
+              {
+                "id": "render",
+                "label": "Phase 3 · Render",
+                "description": {
+                  "body": "Only now does pruning happen: each identity's cumulative % is compared — unrounded — against the UBO threshold. Sub-threshold owners collapse into the background box; unknown stakes are force-surfaced as \"% unknown\", never hidden as 0%.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts"
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "cumulative % per identity",
+                  "out": "org chart + UBO verdicts"
+                }
+              }
+            ]
+          },
+          {
+            "id": "recursion-gates",
+            "type": "decision-table",
+            "title": "Phase 1 recursion gates — does this shareholder earn a paid fetch?",
+            "inputs": [
+              {
+                "id": "shareholder-kind",
+                "label": "Shareholder kind",
+                "type": "select",
+                "options": [
+                  {
+                    "value": "corporate",
+                    "label": "Corporate (a holding company)"
+                  },
+                  {
+                    "value": "individual",
+                    "label": "Individual (a person)"
+                  }
+                ],
+                "default": "corporate"
+              },
+              {
+                "id": "stake-at-floor",
+                "label": "Direct stake known and ≥ the 1% floor?",
+                "type": "boolean",
+                "default": true
+              },
+              {
+                "id": "on-current-path",
+                "label": "Already an ancestor on this path (cycle)?",
+                "type": "boolean",
+                "default": false
+              },
+              {
+                "id": "depth-under-max",
+                "label": "Depth still under the 8-layer backstop?",
+                "type": "boolean",
+                "default": true
+              },
+              {
+                "id": "credits-left",
+                "label": "Registry credits left in the budget?",
+                "type": "boolean",
+                "default": true
+              }
+            ],
+            "rules": [
+              {
+                "when": [
+                  {
+                    "input": "shareholder-kind",
+                    "equals": "individual"
+                  }
+                ],
+                "outcome": "leaf — occurrence recorded, no recursion",
+                "explanation": {
+                  "body": "Individuals are leaves: they can be UBOs but they have no registry parents to fetch. The occurrence is still recorded for Phase 2's sum.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "when": [
+                  {
+                    "input": "stake-at-floor",
+                    "equals": false
+                  }
+                ],
+                "outcome": "no fetch — sub-floor or unknown stake",
+                "explanation": {
+                  "body": "An unknown percentage (?? 0) or a direct stake under the 1% floor never earns a paid fetch — the engine refuses to spend a credit on a branch of unknowable weight. But the occurrence was already recorded, so the holder is never silently dropped.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "when": [
+                  {
+                    "input": "on-current-path",
+                    "equals": true
+                  }
+                ],
+                "outcome": "skipped — per-path cycle guard",
+                "explanation": {
+                  "body": "A owns B owns A would loop forever. The ancestor set is per-path on purpose: a diamond revisits the same entity on a different path, and that must be allowed.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "when": [
+                  {
+                    "input": "depth-under-max",
+                    "equals": false
+                  }
+                ],
+                "outcome": "stopped — the depth-8 backstop",
+                "explanation": {
+                  "body": "Depth 8 is the backstop against pathological chains — the last of the only four recursion gates.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "when": [
+                  {
+                    "input": "credits-left",
+                    "equals": false
+                  }
+                ],
+                "outcome": "childLayerStatus = \"credit_truncated\"",
+                "explanation": {
+                  "body": "An exhausted budget marks the layer with an explicit \"we stopped for budget\" marker — distinguishable from a registry that genuinely has no data, so the chart can say so honestly.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            "defaultOutcome": {
+              "outcome": "fetch the parent record and push to the frontier",
+              "explanation": {
+                "body": "The child inherits the multiplied effectivePct so chains keep diluting, plus a copy of pathAncestors. Note there is no effective-% threshold gate anywhere in this table: Phase 1 explores, only Phase 3 prunes.",
+                "anchors": [
+                  {
+                    "file": "lib/company-registry/ownership-graph.ts",
+                    "lines": {
+                      "start": 188,
+                      "end": 208
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "frontier-loop-walkthrough",
+            "type": "code-walkthrough",
+            "title": "The code that enforces \"explore, don't prune\"",
+            "code": [
+              "for (const sh of shareholders) {",
+              "  // stake `undefined` ≠ stated 0%: registry listed a holder with NO %",
+              "  const stakeKnown = sh.ownership_percentage != null;",
+              "  const directPct = sh.ownership_percentage ?? 0;",
+              "  const effectivePct = (node.effectivePct * directPct) / 100;",
+              "  const { id: stableId } = stableIdForPsc(sh);",
+              "",
+              "  occurrences.push(occ);   // ALL shareholders stored — even sub-threshold",
+              "",
+              "  if (sh.kind !== 'corporate') continue;",
+              "  if (directPct < directFloorPct) continue;",
+              "  if (node.pathAncestors.has(stableId)) continue;",
+              "  if (node.depth + 1 >= MAX_DEPTH) continue;",
+              "",
+              "  const { record, truncated } = await fetchParent(resolved);",
+              "  if (truncated) { occ.childLayerStatus = 'credit_truncated'; creditCapReached = true; continue; }",
+              "  if (!record)   { occ.childLayerStatus = 'no_shareholder_data'; continue; }",
+              "",
+              "  frontier.push({ record, stableId, effectivePct, depth: node.depth + 1,",
+              "                  pathAncestors: new Set(node.pathAncestors).add(stableId), occurrence: occ });",
+              "}"
+            ],
+            "source": {
+              "file": "lib/company-registry/ownership-graph.ts",
+              "lines": {
+                "start": 188,
+                "end": 208
+              }
+            },
+            "steps": [
+              {
+                "lines": {
+                  "start": 1,
+                  "end": 1
+                },
+                "commentary": {
+                  "body": "We just popped a node off the max-heap — heaviest effective % first, because a tight credit cap should buy the most threshold-revealing fetches.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 2,
+                  "end": 4
+                },
+                "commentary": {
+                  "body": "The ENG-250 subtlety: ownership_percentage == null means the registry listed a holder but stated NO stake. That is not 0%. stakeKnown rides along to Phase 2 (where one unknown occurrence poisons \"provably sub-threshold\") and Phase 3 (force-surface as \"% unknown\").",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 5,
+                  "end": 6
+                },
+                "commentary": {
+                  "body": "Chain-multiply: a 60% owner of a node worth 20% of the root is worth 20 × 60 / 100 = 12%. Identity is keyed on registration number + country, never display name — two registries may spell the same holding company differently.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "symbol": "stableIdForPsc"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 8,
+                  "end": 8
+                },
+                "commentary": {
+                  "body": "EVERY shareholder becomes an occurrence — including ones that look hopelessly small on this path. Phase 2 may promote them: 9% here plus 10% on another path is 19%, and at a 15% threshold that's a UBO. Prune here and diamonds lose their owners.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 10,
+                  "end": 13
+                },
+                "commentary": {
+                  "body": "The only four recursion gates: individuals are leaves; a direct stake under the 1% floor (or unknown — ?? 0) doesn't earn a paid fetch; a per-path ancestor set kills cycles (A owns B owns A); depth 8 is the backstop. Conspicuously absent: any effective-% threshold check. Phase 1 explores; only Phase 3 prunes.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 15,
+                  "end": 17
+                },
+                "commentary": {
+                  "body": "The fetch is the money moment — credit-gated through the budget's single charge() chokepoint and memoised per run (a diamond parent reached via two children is fetched once, rendered twice). An exhausted budget marks the layer credit_truncated — an explicit \"we stopped for budget\" marker, distinguishable from a registry that genuinely has no data.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 19,
+                  "end": 20
+                },
+                "commentary": {
+                  "body": "Recurse: the child inherits the multiplied effectivePct so chains keep diluting, and a COPY of pathAncestors — the cycle guard is per-path on purpose, because a diamond revisits the same entity on a different path and that must be allowed.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "unknown-stake-bug-class",
+            "type": "callout",
+            "kind": "warning",
+            "title": "The bug class this design kills",
+            "body": "An unknown stake (ownership_percentage == null) is NOT 0%. It's recorded as an occurrence (the owner is never silently dropped) but not recursed into (don't burn a credit on a branch of unknowable weight), and in Phase 2 one unknown occurrence means the entity can never be proven sub-threshold — so Phase 3 force-surfaces it with \"% unknown\" instead of hiding it in the background box.",
+            "anchors": [
+              {
+                "file": "lib/company-registry/ownership-graph.ts",
+                "lines": {
+                  "start": 188,
+                  "end": 208
+                }
+              }
+            ]
+          },
+          {
+            "id": "ownership-confirmation-figure",
+            "type": "code-figure",
+            "code": [
+              "export function isOwnershipChartConfirmed(data: Pick<ApplicationData, 'meta' | 'fields'>): boolean {",
+              "  // v2 wizard meta is authoritative when present; only fall back to the",
+              "  // legacy all_owners_added attestation when no wizard meta exists.",
+              "  if (data.meta.ownershipWizard) return data.meta.ownershipWizard.confirmed === true;",
+              "  return data.fields.all_owners_added === true;",
+              "}"
+            ],
+            "source": {
+              "file": "lib/ownership/confirmation.ts",
+              "symbol": "isOwnershipChartConfirmed",
+              "lines": {
+                "start": 9,
+                "end": 14
+              }
+            },
+            "caption": {
+              "body": "Two more pieces close the loop. Analysts can replay the whole engine against cached registry data — explainOwnershipFromCache() uses an Infinity cap with a non-persisting ledger, so \"why isn't owner X on the chart?\" costs zero credits. And submission is gated by this one shared helper, used by both the wizard UI and the submit endpoint so they can never disagree.",
+              "anchors": [
+                {
+                  "file": "lib/ownership/confirmation.ts",
+                  "symbol": "isOwnershipChartConfirmed"
+                },
+                {
+                  "file": "lib/company-registry/ownership-graph.ts",
+                  "symbol": "explainOwnershipFromCache"
+                }
+              ]
+            }
+          },
+          {
+            "id": "ownership-checkpoint",
+            "type": "quiz",
+            "title": "Checkpoint — ownership",
+            "questions": [
+              {
+                "id": "phase1-pruning",
+                "prompt": "If Phase 1 pruned every branch whose per-path effective % was below the threshold, what would break?",
+                "options": [
+                  {
+                    "id": "nothing-faster",
+                    "label": "Nothing — it would just run faster and spend fewer credits"
+                  },
+                  {
+                    "id": "cycle-detection",
+                    "label": "Cycle detection would loop forever"
+                  },
+                  {
+                    "id": "diamond-aggregation",
+                    "label": "Diamond aggregation — an owner who is sub-threshold on every individual path but ≥ threshold in total would never be summed, so real UBOs vanish"
+                  },
+                  {
+                    "id": "budget-overspent",
+                    "label": "The credit budget would be overspent"
+                  }
+                ],
+                "correctOptionId": "diamond-aggregation",
+                "explanation": {
+                  "body": "That's the load-bearing rule: Phase 1 explores, only Phase 3 prunes. Recursion is gated by credits, a tiny direct-% floor, and a per-path cycle guard — never by effective %. Only Phase 2's cumulative sum may be compared to the threshold.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unknown-percentage",
+                "prompt": "The registry lists a corporate shareholder but states no percentage. The engine…",
+                "options": [
+                  {
+                    "id": "treat-as-zero",
+                    "label": "Treats it as 0% and collapses it into the background box"
+                  },
+                  {
+                    "id": "record-surface-no-recurse",
+                    "label": "Records the occurrence, does NOT recurse into it, and force-surfaces it as \"% unknown\" — never as 0%"
+                  },
+                  {
+                    "id": "estimate-remainder",
+                    "label": "Estimates the stake from the remaining unallocated percentage"
+                  },
+                  {
+                    "id": "abort-enrichment",
+                    "label": "Aborts enrichment for the whole application"
+                  }
+                ],
+                "correctOptionId": "record-surface-no-recurse",
+                "explanation": {
+                  "body": "Unknown ≠ zero. The holder is never silently dropped (occurrence recorded, force-surfaced), but the engine won't burn a paid credit exploring a branch whose weight it can't even see — and one unknown occurrence means the entity can never be \"proven\" sub-threshold.",
+                  "anchors": [
+                    {
+                      "file": "lib/company-registry/ownership-graph.ts",
+                      "lines": {
+                        "start": 188,
+                        "end": 208
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "ownership-connects-back",
+            "type": "callout",
+            "kind": "connects-to",
+            "title": "Connects back",
+            "body": "The engine writes the OwnershipRelationship[] + markers you clicked in the Data Model module; enrichment is scheduled fire-and-forget by createApplication; the org-chart wizard renders it via OwnersSection; and submitApplication checks isOwnershipChartConfirmed().",
+            "anchors": [
+              {
+                "file": "lib/ownership/confirmation.ts",
+                "symbol": "isOwnershipChartConfirmed"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lifecycle-spine",
+        "title": "Lifecycle & the Backend Spine",
+        "summary": "lib/application-service.ts (~2,800 lines) is the spine: every create, update, upload, submit, and decision passes through it. Two things to internalize: the status lifecycle below, and the one pattern all fifteen service functions share.",
+        "widgets": [
+          {
+            "id": "application-status-machine",
+            "type": "state-machine",
+            "title": "Application status lifecycle",
+            "states": [
+              {
+                "id": "created",
+                "label": "created",
+                "description": {
+                  "body": "Writable — the row exists (createApplication) but no invite email was sent (sendInvite: false). The config version is frozen onto the row at this moment.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "createApplication"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "sent",
+                "label": "sent",
+                "description": {
+                  "body": "Writable — the invite email went out with the link_slug URL. Registry enrichment is already running fire-and-forget in the background.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "isWritableStatus",
+                      "lines": {
+                        "start": 94,
+                        "end": 94
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "in-progress",
+                "label": "in_progress",
+                "description": {
+                  "body": "Writable — flipped automatically by the FIRST participant PATCH. This is where applications live most of their life.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "participantUpdateApplicationData"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "submitted",
+                "label": "submitted",
+                "description": {
+                  "body": "submitApplication re-ran the full getApplicationState() validation server-side inside the row lock, found nothing missing, and froze the data. Webhooks + Slack fire after commit.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "submitApplication"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "review",
+                "label": "review",
+                "description": {
+                  "body": "An analyst is looking at it in the dashboard. approve/reject are accepted from either submitted or review.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "approved",
+                "label": "approved",
+                "description": {
+                  "body": "Terminal — approveApplication guards the transition (only from submitted/review), stamps completed_at, then notifies fire-and-forget.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "approveApplication"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "rejected",
+                "label": "rejected",
+                "description": {
+                  "body": "Terminal — mirror of approve. A rejected application also refuses to mint new participant JWTs.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts"
+                    }
+                  ]
+                }
+              }
+            ],
+            "transitions": [
+              {
+                "from": "created",
+                "to": "sent",
+                "trigger": "invite"
+              },
+              {
+                "from": "sent",
+                "to": "in-progress",
+                "trigger": "first PATCH"
+              },
+              {
+                "from": "in-progress",
+                "to": "submitted",
+                "trigger": "submit ✓",
+                "commentary": {
+                  "body": "Data PATCHes are only accepted in created, sent, and in_progress — isWritableStatus() guards every mutation. Once submitted, the data is frozen for review.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "isWritableStatus",
+                      "lines": {
+                        "start": 94,
+                        "end": 94
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "from": "submitted",
+                "to": "review",
+                "trigger": "analyst opens"
+              },
+              {
+                "from": "review",
+                "to": "approved",
+                "trigger": "approve"
+              },
+              {
+                "from": "review",
+                "to": "rejected",
+                "trigger": "reject"
+              },
+              {
+                "from": "submitted",
+                "to": "approved",
+                "trigger": "approve"
+              },
+              {
+                "from": "submitted",
+                "to": "rejected",
+                "trigger": "reject"
+              }
+            ]
+          },
+          {
+            "id": "participant-update-walkthrough",
+            "type": "code-walkthrough",
+            "title": "The one pattern: lock → guard → merge → recompute → commit → notify",
+            "code": [
+              "export async function participantUpdateApplicationData(id, patch, participantId, scopedPersonId?) {",
+              "  const result = await db.transaction(async (tx) => {",
+              "    const row = await lockApplicationForUpdate(tx, id);   // SELECT ... FOR UPDATE",
+              "    if (!row) return { success: false, error: 'Application not found' };",
+              "    if (!isWritableStatus(row.status))",
+              "      return { success: false, error: `Cannot update application in ${row.status} status` };",
+              "",
+              "    if (scopedPersonId && (patch.fields || patch.ownership || patch.entities))",
+              "      return { success: false, error: 'Collaborators can only update their assigned person' };",
+              "",
+              "    const validation = validateParticipantArrayPatch(patch, currentData);",
+              "    if (!validation.valid) return { success: false, error: validation.errors.join('; ') };",
+              "",
+              "    const merged = mergeParticipantPatch(currentData, sanitizedArrays, patch);",
+              "",
+              "    const newlyDismissedOwnership = detectNewlyDismissedOwnership(currentData.ownership, merged.ownership);",
+              "    const newlyDismissedPeople    = detectNewlyDismissedPeople(currentData.people, merged.people);",
+              "",
+              "    const computed = new RuleEngine(config).computeValues(merged);",
+              "    const newStatus = (row.status === 'created' || row.status === 'sent') ? 'in_progress' : row.status;",
+              "",
+              "    await tx.update(applications)",
+              "      .set({ data: merged, computed_cache: computed, status: newStatus, updated_at: new Date() })",
+              "      .where(eq(applications.id, id));",
+              "    return { success: true, newlyDismissedOwnership, newlyDismissedPeople };",
+              "  });",
+              "  // activity log rows written OUTSIDE the transaction — non-critical path",
+              "}"
+            ],
+            "source": {
+              "file": "lib/application-service.ts",
+              "symbol": "participantUpdateApplicationData",
+              "lines": {
+                "start": 704,
+                "end": 731
+              }
+            },
+            "steps": [
+              {
+                "lines": {
+                  "start": 2,
+                  "end": 3
+                },
+                "commentary": {
+                  "body": "Lock. Everything happens inside one transaction that starts with SELECT … FOR UPDATE. Two participants (or a participant plus a background enrichment job) hitting the same row are serialized — the second waits, then reads the already-updated state. No lost updates on the JSONB blob, ever.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "lockApplicationForUpdate"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 4,
+                  "end": 6
+                },
+                "commentary": {
+                  "body": "Guard. Writes are only legal in created / sent / in_progress. A PATCH against a submitted application gets an explicit error, not a silent drop — you saw this state machine above.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "isWritableStatus"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 8,
+                  "end": 9
+                },
+                "commentary": {
+                  "body": "Scope. A collaborator's JWT carries a personId; they may only touch their assigned person. Any attempt to patch fields, ownership, or entities is refused outright.",
+                  "anchors": [
+                    {
+                      "file": "utils/application-participant-auth.ts"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 11,
+                  "end": 14
+                },
+                "commentary": {
+                  "body": "Merge, deny-by-default. A naive spread would let a buggy client blank out documents, consent, or registry rows. mergeParticipantPatch lets the patch touch participant-owned data only; everything server-owned is re-applied from the locked row.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "mergeParticipantPatch"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 16,
+                  "end": 17
+                },
+                "commentary": {
+                  "body": "Audit. Diffing before/after catches registry rows soft-deleted in this patch — each dismissed person or ownership edge gets its own activity-log entry, because a regulator will one day ask why a registry-supplied owner disappeared.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "detectNewlyDismissedPeople"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 19,
+                  "end": 24
+                },
+                "commentary": {
+                  "body": "Recompute + commit. Computed values are refreshed into computed_cache (so dashboards can filter without re-running the engine), the first-ever write flips created/sent → in_progress, and the transaction commits atomically.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "participantUpdateApplicationData"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 27,
+                  "end": 27
+                },
+                "commentary": {
+                  "body": "Notify, outside. Activity logging — and in the submit/approve siblings, webhooks and Slack — happens AFTER commit, fire-and-forget. Slow or broken downstreams can't roll back a user's save. Every one of the ~15 service functions follows this exact shape.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "participantUpdateApplicationData"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "why-select-for-update",
+            "type": "callout",
+            "kind": "why",
+            "title": "Why SELECT … FOR UPDATE?",
+            "body": "Two participants — or a participant plus a background enrichment job — can hit the same application at once. The row lock serializes them so the JSONB blob never suffers a lost-update race. Slow work (webhooks, Slack, enrichment) always happens after commit, fire-and-forget, so a broken customer endpoint can never roll back a submit.",
+            "anchors": [
+              {
+                "file": "lib/application-service.ts",
+                "symbol": "lockApplicationForUpdate"
+              }
+            ]
+          },
+          {
+            "id": "deny-by-default-merge",
+            "type": "callout",
+            "kind": "warning",
+            "title": "Deny-by-default merge",
+            "body": "A naive { ...current, ...patch } would let a buggy client blank out documents, consent, or registry ownership. mergeParticipantPatch only lets participants touch participant-owned data; everything server-owned is re-applied from the locked row. Dismissed registry rows are detected by diffing before/after — each gets its own audit-log entry, because regulators care WHY a registry-supplied owner disappeared.",
+            "anchors": [
+              {
+                "file": "lib/application-service.ts",
+                "symbol": "mergeParticipantPatch"
+              }
+            ]
+          },
+          {
+            "id": "lifecycle-checkpoint",
+            "type": "quiz",
+            "title": "Checkpoint — the lifecycle",
+            "questions": [
+              {
+                "id": "submitted-patch",
+                "prompt": "A PATCH arrives for an application whose status is submitted. The service layer…",
+                "options": [
+                  {
+                    "id": "merges-anyway",
+                    "label": "Merges it and leaves the status untouched"
+                  },
+                  {
+                    "id": "queues-it",
+                    "label": "Queues it until an analyst moves the app back to review"
+                  },
+                  {
+                    "id": "rejects-it",
+                    "label": "Rejects it — isWritableStatus() only allows created / sent / in_progress"
+                  },
+                  {
+                    "id": "hides-404",
+                    "label": "Returns 404 to hide the application's existence"
+                  }
+                ],
+                "correctOptionId": "rejects-it",
+                "explanation": {
+                  "body": "Every mutation locks the row and guards the status first. Once submitted, the data is frozen for review — the participant gets an explicit \"Cannot update application in submitted status\" error.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "isWritableStatus"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "autosave-wizard",
+        "title": "Autosave & the Wizard",
+        "summary": "The wizard is React Context + hooks — no Redux. The core loop: a keystroke updates state instantly, stages into a pendingChanges ref, and a 2-second debounce collapses a burst of typing into exactly one PATCH.",
+        "widgets": [
+          {
+            "id": "keystroke-journey",
+            "type": "pipeline",
+            "title": "The autosave loop — the full journey of a keystroke",
+            "stages": [
+              {
+                "id": "keystroke",
+                "label": "Keystroke",
+                "description": {
+                  "body": "State updates instantly — the input never lags — and the delta stages into the pendingChanges ref, keyed by field id.",
+                  "anchors": [
+                    {
+                      "file": "components/applications/hooks/useApplicationState.ts",
+                      "symbol": "useApplicationState"
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "input event",
+                  "out": "staged delta"
+                }
+              },
+              {
+                "id": "debounce",
+                "label": "2s debounce",
+                "description": {
+                  "body": "Every keystroke RESETS the 2-second timer — the PATCH fires 2s after you stop, not 2s after you start. A burst of typing collapses into exactly one request.",
+                  "anchors": [
+                    {
+                      "file": "components/applications/hooks/useApplicationState.ts",
+                      "symbol": "flushSave"
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "staged delta",
+                  "out": "one flush"
+                }
+              },
+              {
+                "id": "flush",
+                "label": "flushSave()",
+                "description": {
+                  "body": "The accumulated delta is captured and the ref immediately reset, so keystrokes landing while the PATCH is in flight accumulate separately — nothing lost, nothing double-sent.",
+                  "anchors": [
+                    {
+                      "file": "components/applications/hooks/useApplicationState.ts",
+                      "symbol": "flushSave"
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "pendingChanges",
+                  "out": "the delta patch"
+                }
+              },
+              {
+                "id": "patch",
+                "label": "PATCH the delta",
+                "description": {
+                  "body": "The delta — not the whole document — lands in participantUpdateApplicationData, which locks the row and merges deny-by-default.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "participantUpdateApplicationData"
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "the delta patch",
+                  "out": "merged under row lock"
+                }
+              },
+              {
+                "id": "settle",
+                "label": "Saved (or retry)",
+                "description": {
+                  "body": "Success flips the badge to Saved and clears the localStorage backup. Failure restores the delta to pendingChanges for retry and writes a backup — with national_insurance_number deliberately stripped.",
+                  "anchors": [
+                    {
+                      "file": "components/applications/hooks/useApplicationState.ts",
+                      "symbol": "flushSave"
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "response",
+                  "out": "saveStatus: saved | error"
+                }
+              }
+            ]
+          },
+          {
+            "id": "flush-save-walkthrough",
+            "type": "code-walkthrough",
+            "title": "flushSave() and its wrapper, stepped through",
+            "code": [
+              "const flushSave = useCallback(async (): Promise<boolean> => {",
+              "  if (saveTimeoutRef.current) { clearTimeout(saveTimeoutRef.current); saveTimeoutRef.current = null; }",
+              "  const patch = pendingChanges.current;",
+              "  if (Object.keys(patch).length === 0) return true;",
+              "",
+              "  pendingChanges.current = {};        // in-flight edits accumulate separately",
+              "  setSaveStatus(\"saving\");",
+              "",
+              "  const response = await applicationApiRequest(`/api/applications/${applicationId}`, {",
+              "    method: \"PATCH\", body: JSON.stringify(patch),",
+              "  });",
+              "",
+              "  if (!response.ok) {",
+              "    setSaveStatus(\"error\");",
+              "    pendingChanges.current = mergePendingChanges(patch, pendingChanges.current);",
+              "    const safeData = { ...patch };",
+              "    if (safeData.fields) { const f = { ...safeData.fields }; delete f.national_insurance_number; safeData.fields = f; }",
+              "    localStorage.setItem(`app-backup:${applicationId}`, JSON.stringify({ data: safeData, timestamp: Date.now() }));",
+              "    return false;",
+              "  }",
+              "",
+              "  setSaveStatus(\"saved\");",
+              "  localStorage.removeItem(`app-backup:${applicationId}`);",
+              "  return true;",
+              "}, [applicationId]);"
+            ],
+            "source": {
+              "file": "components/applications/hooks/useApplicationState.ts",
+              "symbol": "flushSave",
+              "lines": {
+                "start": 68,
+                "end": 92
+              }
+            },
+            "steps": [
+              {
+                "lines": {
+                  "start": 1,
+                  "end": 2
+                },
+                "commentary": {
+                  "body": "The debounce fired (or saveNow() forced it — submit does this and aborts if the save fails, so the server never validates stale state). First: disarm any still-pending timer.",
+                  "anchors": [
+                    {
+                      "file": "components/applications/hooks/useApplicationState.ts",
+                      "symbol": "flushSave"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 3,
+                  "end": 6
+                },
+                "commentary": {
+                  "body": "Capture the accumulated delta and immediately reset the ref. This is the subtle bit: keystrokes that land while the PATCH is in flight accumulate into a fresh empty object — nothing is lost, nothing is double-sent.",
+                  "anchors": [
+                    {
+                      "file": "components/applications/hooks/useApplicationState.ts",
+                      "symbol": "flushSave"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 9,
+                  "end": 11
+                },
+                "commentary": {
+                  "body": "PATCH the delta, not the whole document. The server (the Lifecycle module's walkthrough) locks the row and merges deny-by-default — so even a malicious hand-crafted patch can't blank server-owned data.",
+                  "anchors": [
+                    {
+                      "file": "lib/application-service.ts",
+                      "symbol": "participantUpdateApplicationData"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 13,
+                  "end": 15
+                },
+                "commentary": {
+                  "body": "Failure path 1 — retry. The failed delta is merged back UNDER whatever accumulated during the flight (newer edits win), so the next debounce cycle retries everything.",
+                  "anchors": [
+                    {
+                      "file": "components/applications/hooks/useApplicationState.ts",
+                      "symbol": "mergePendingChanges"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 16,
+                  "end": 18
+                },
+                "commentary": {
+                  "body": "Failure path 2 — the safety net. A localStorage backup is written in case the tab dies before a retry succeeds… with national_insurance_number deliberately deleted first. Sensitive data never rests in browser storage.",
+                  "anchors": [
+                    {
+                      "file": "components/applications/hooks/useApplicationState.ts",
+                      "symbol": "flushSave"
+                    }
+                  ]
+                }
+              },
+              {
+                "lines": {
+                  "start": 22,
+                  "end": 24
+                },
+                "commentary": {
+                  "body": "Success. The badge flips to \"Saved\", the backup is cleared. When the SERVER later changes data the client didn't author (doc extraction, enrichment), refresh() runs: flush my edits → GET → re-queue anything that raced in.",
+                  "anchors": [
+                    {
+                      "file": "components/applications/hooks/useApplicationState.ts",
+                      "symbol": "refresh"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "why-clear-hidden-fields",
+            "type": "callout",
+            "kind": "why",
+            "title": "Why clear hidden fields?",
+            "body": "Pick \"retail\", fill inventory_storage, then switch industry to \"SaaS\" — that field is now invisible but its value still sits in data.fields. Left there it would be PATCHed to the server, could wrongly satisfy a requirement, and could leak into a webhook. So visibilityAwareUpdateField re-evaluates visibility after every change and nulls anything that just went dark — the data always matches what the rule engine says should exist.",
+            "anchors": [
+              {
+                "file": "components/applications/hooks/useApplicationState.ts",
+                "symbol": "visibilityAwareUpdateField"
+              }
+            ]
+          },
+          {
+            "id": "autosave-checkpoint",
+            "type": "quiz",
+            "title": "Checkpoint — autosave",
+            "questions": [
+              {
+                "id": "debounce-patch-count",
+                "prompt": "An applicant types 12 characters over ~3 seconds, then stops. How many PATCH requests fire?",
+                "options": [
+                  {
+                    "id": "twelve",
+                    "label": "Twelve — one per keystroke"
+                  },
+                  {
+                    "id": "exactly-one",
+                    "label": "Exactly one, about 2 seconds after the last keystroke"
+                  },
+                  {
+                    "id": "two-windows",
+                    "label": "Two — one per 2-second window"
+                  },
+                  {
+                    "id": "zero-until-blur",
+                    "label": "Zero until the field loses focus"
+                  }
+                ],
+                "correctOptionId": "exactly-one",
+                "explanation": {
+                  "body": "Each keystroke resets the 2s debounce timer, so a burst collapses into a single PATCH containing the accumulated pendingChanges delta.",
+                  "anchors": [
+                    {
+                      "file": "components/applications/hooks/useApplicationState.ts",
+                      "symbol": "flushSave"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "server-round-trip",
+            "type": "callout",
+            "kind": "connects-to",
+            "title": "Server round-trip",
+            "body": "The PATCH lands in the Lifecycle module's participantUpdateApplicationData. When the server changes data the client didn't author (document auto-extraction, enrichment), the wizard calls refresh(): flush my edits first, then GET, then re-queue anything that raced in.",
+            "anchors": [
+              {
+                "file": "lib/application-service.ts",
+                "symbol": "participantUpdateApplicationData"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "document-validation",
+        "title": "Document Validation",
+        "summary": "When a participant uploads a passport or bank statement, an AI assembly line decides its fate and streams progress over SSE: OCR → classify → clarity → adequacy → date rules → verdict. Deterministic code brackets the LLM — extracted key-value pairs backstop extraction, and date arithmetic is never left to a model.",
+        "widgets": [
+          {
+            "id": "validation-pipeline",
+            "type": "pipeline",
+            "title": "Validation pipeline — OCR to verdict",
+            "stages": [
+              {
+                "id": "ocr",
+                "label": "OCR / Textract",
+                "description": {
+                  "body": "Text and key-value pairs are extracted first. Under 50 characters extracted trips isLowText — the hinge that smart-switches the provider so a vision model reads the scanned image instead of trusting OCR text.",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/utils.ts"
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "uploaded document",
+                  "out": "raw text + KV pairs"
+                }
+              },
+              {
+                "id": "classify",
+                "label": "Classify",
+                "description": {
+                  "body": "An LLM names the documentType with a confidence score. documentType \"unknown\" is a hard stop at the verdict.",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/utils.ts",
+                      "symbol": "checkDocumentTypeMatch"
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "raw text + image",
+                  "out": "documentType + confidence"
+                }
+              },
+              {
+                "id": "clarity",
+                "label": "Clarity",
+                "description": {
+                  "body": "Is the image readable? Critical severity that is not acceptable fails the document outright — the participant must re-upload (the state machine loops back to pending).",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/utils.ts",
+                      "symbol": "determineValidationStatus"
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "image",
+                  "out": "severity + isAcceptable"
+                }
+              },
+              {
+                "id": "adequacy",
+                "label": "Adequacy",
+                "description": {
+                  "body": "Does the document actually cover what the field needs — required fields present, and the name matching the person it's attached to? adequacy.nameMatch === false is an automatic fail regardless of confidence.",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/utils.ts",
+                      "symbol": "determineValidationStatus"
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "extracted fields",
+                  "out": "isAdequate + nameMatch + missingFields"
+                }
+              },
+              {
+                "id": "date-rules",
+                "label": "Date rules",
+                "description": {
+                  "body": "Date arithmetic is never left to a model: deterministic code checks expiry and recency windows — a bank statement from 5 months ago fails a \"within 3 months\" requirement in plain code.",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/date-validator.ts"
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "extracted dates",
+                  "out": "date findings"
+                }
+              },
+              {
+                "id": "verdict",
+                "label": "Verdict",
+                "description": {
+                  "body": "determineValidationStatus() folds it all: hard stops → FAILED, soft doubts → NEEDS_REVIEW, otherwise PASSED. Progress streamed to the wizard's card over SSE at 10% / 50% / 75% / 90%.",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/utils.ts",
+                      "symbol": "determineValidationStatus",
+                      "lines": {
+                        "start": 22,
+                        "end": 42
+                      }
+                    }
+                  ]
+                },
+                "flow": {
+                  "in": "all findings",
+                  "out": "PASSED / NEEDS_REVIEW / FAILED"
+                }
+              }
+            ]
+          },
+          {
+            "id": "verdict-function-figure",
+            "type": "code-figure",
+            "code": [
+              "export function determineValidationStatus(classification, clarity, adequacy, overallConfidence, itemType?, acceptableDocTypes?): ValidationStatus {",
+              "  // FAILED — hard stops",
+              "  if (",
+              "    classification.documentType === 'unknown' ||",
+              "    (clarity.severity === 'critical' && !clarity.isAcceptable) ||",
+              "    !adequacy.isAdequate ||",
+              "    adequacy.nameMatch === false ||          // name mismatch = automatic fail",
+              "    overallConfidence < 0.5",
+              "  ) return ValidationStatus.FAILED;",
+              "",
+              "  // NEEDS_REVIEW — soft doubts",
+              "  const isTypeAcceptable = checkDocumentTypeMatch(classification, acceptableDocTypes);",
+              "  if (",
+              "    overallConfidence < 0.7 ||",
+              "    !isTypeAcceptable ||",
+              "    clarity.severity === 'warning' ||",
+              "    adequacy.missingFields.length > 0",
+              "  ) return ValidationStatus.NEEDS_REVIEW;",
+              "",
+              "  return ValidationStatus.PASSED;",
+              "}"
+            ],
+            "source": {
+              "file": "ai/document-validation/utils.ts",
+              "symbol": "determineValidationStatus",
+              "lines": {
+                "start": 22,
+                "end": 42
+              }
+            },
+            "highlight": {
+              "start": 7,
+              "end": 7
+            },
+            "caption": {
+              "body": "The verdict function, verbatim. PASSED → document status accepted · NEEDS_REVIEW → clarification_needed · FAILED → rejected — the state machine from the Data Model module. After acceptance, extracted identity fields (name, DOB, address) auto-populate the person record, but only for fields whose config opted in via automation.source = 'document_extraction' — which is why the wizard calls refresh() afterwards.",
+              "anchors": [
+                {
+                  "file": "ai/document-validation/utils.ts",
+                  "symbol": "determineValidationStatus",
+                  "lines": {
+                    "start": 22,
+                    "end": 42
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "observability-not-optional",
+            "type": "callout",
+            "kind": "why",
+            "title": "Observability is not optional",
+            "body": "Every classification/clarity/adequacy call is wrapped in traceAIOperation() (Braintrust/OTel) and analytics tracing with privacyMode: true so document contents never leak into analytics. If you add an LLM call anywhere in the codebase, it must be traced — that's a standing repo rule.",
+            "anchors": [
+              {
+                "file": "ai/document-validation/utils.ts"
+              }
+            ]
+          },
+          {
+            "id": "validation-checkpoint",
+            "type": "quiz",
+            "title": "Checkpoint — document validation",
+            "questions": [
+              {
+                "id": "name-mismatch-verdict",
+                "prompt": "A passport is crisp, classification confidence is 0.98… but the name doesn't match the person it's attached to. Verdict?",
+                "options": [
+                  {
+                    "id": "passed-confidence",
+                    "label": "PASSED — confidence dominates"
+                  },
+                  {
+                    "id": "needs-review-human",
+                    "label": "NEEDS_REVIEW — a human should decide"
+                  },
+                  {
+                    "id": "failed-hard-stop",
+                    "label": "FAILED — adequacy.nameMatch === false is a hard stop, regardless of confidence"
+                  },
+                  {
+                    "id": "depends-provider",
+                    "label": "Depends on which AI provider ran the check"
+                  }
+                ],
+                "correctOptionId": "failed-hard-stop",
+                "explanation": {
+                  "body": "The FAILED block in determineValidationStatus() checks name mismatch before any soft signals. A perfect passport belonging to the wrong person is exactly the fraud case the pipeline exists to catch.",
+                  "anchors": [
+                    {
+                      "file": "ai/document-validation/utils.ts",
+                      "symbol": "determineValidationStatus",
+                      "lines": {
+                        "start": 22,
+                        "end": 42
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "auth-plumbing",
+        "title": "Auth & Plumbing",
+        "summary": "Three kinds of caller, three auth methods — trace each lane hop by hop. Underneath: one Drizzle client over all schemas, QStash-queued webhooks, and subdomain routing for the admin backoffice.",
+        "widgets": [
+          {
+            "id": "auth-lanes-map",
+            "type": "system-map",
+            "title": "Who gets in, and how",
+            "nodes": [
+              {
+                "id": "analyst-login",
+                "label": "Analyst · login",
+                "description": "The analyst lane starts at the org dashboard: login with email or Google.",
+                "anchors": [
+                  {
+                    "file": "utils/application-participant-auth.ts"
+                  }
+                ]
+              },
+              {
+                "id": "analyst-cookie",
+                "label": "session cookie"
+              },
+              {
+                "id": "analyst-session",
+                "label": "BetterAuth session"
+              },
+              {
+                "id": "analyst-membership",
+                "label": "org membership check"
+              },
+              {
+                "id": "analyst-service",
+                "label": "route → service layer"
+              },
+              {
+                "id": "participant-slug",
+                "label": "Participant · link_slug",
+                "description": "The participant lane starts from the shareable link: it carries a public link_slug; the secret access_token lives only in the DB.",
+                "anchors": [
+                  {
+                    "file": "utils/application-participant-auth.ts"
+                  }
+                ]
+              },
+              {
+                "id": "participant-otp",
+                "label": "email OTP verify"
+              },
+              {
+                "id": "participant-jwt",
+                "label": "JWT · 1h · auto-refresh",
+                "description": "Verifying your email mints a 1-hour JWT — and minting re-validates the entire chain (participant not blocked, application not expired/rejected, org active), so a JWT can never be issued for a dead application.",
+                "anchors": [
+                  {
+                    "file": "utils/application-participant-auth.ts"
+                  }
+                ]
+              },
+              {
+                "id": "participant-scope",
+                "label": "personId scope",
+                "description": "Collaborator JWTs carry a personId that scopes them to a single person's data.",
+                "anchors": [
+                  {
+                    "file": "utils/application-participant-auth.ts"
+                  }
+                ]
+              },
+              {
+                "id": "participant-api",
+                "label": "/api/applications/[id]/*"
+              },
+              {
+                "id": "partner-bearer",
+                "label": "Partner · bearer key",
+                "description": "The partner-system lane authenticates with a bearer API key of the form {clientId}.{secret}.",
+                "anchors": [
+                  {
+                    "file": "utils/application-participant-auth.ts"
+                  }
+                ]
+              },
+              {
+                "id": "partner-hash",
+                "label": "SHA-256 hash match"
+              },
+              {
+                "id": "partner-scope",
+                "label": "scope check"
+              },
+              {
+                "id": "partner-org-active",
+                "label": "org active?"
+              },
+              {
+                "id": "partner-api",
+                "label": "/api/external/*"
+              }
+            ],
+            "edges": [
+              {
+                "from": "analyst-login",
+                "to": "analyst-cookie"
+              },
+              {
+                "from": "analyst-cookie",
+                "to": "analyst-session"
+              },
+              {
+                "from": "analyst-session",
+                "to": "analyst-membership"
+              },
+              {
+                "from": "analyst-membership",
+                "to": "analyst-service"
+              },
+              {
+                "from": "participant-slug",
+                "to": "participant-otp"
+              },
+              {
+                "from": "participant-otp",
+                "to": "participant-jwt"
+              },
+              {
+                "from": "participant-jwt",
+                "to": "participant-scope"
+              },
+              {
+                "from": "participant-scope",
+                "to": "participant-api"
+              },
+              {
+                "from": "partner-bearer",
+                "to": "partner-hash"
+              },
+              {
+                "from": "partner-hash",
+                "to": "partner-scope"
+              },
+              {
+                "from": "partner-scope",
+                "to": "partner-org-active"
+              },
+              {
+                "from": "partner-org-active",
+                "to": "partner-api"
+              }
+            ]
+          },
+          {
+            "id": "two-token-model",
+            "type": "callout",
+            "kind": "why",
+            "title": "The two-token model",
+            "body": "The shareable link carries a public link_slug; the secret access_token lives only in the DB. Verifying your email mints a 1-hour JWT — and minting re-validates the entire chain (participant not blocked, application not expired/rejected, org active), so a JWT can never be issued for a dead application.",
+            "anchors": [
+              {
+                "file": "utils/application-participant-auth.ts"
+              }
+            ]
+          },
+          {
+            "id": "webhook-emit-figure",
+            "type": "code-figure",
+            "code": [
+              "const payload = { id: `evt_${crypto.randomUUID()}`, type: eventType, timestamp: ..., organizationId, applicationId, data };",
+              "await Promise.all(endpoints.map(async (ep) => {",
+              "  const [delivery] = await db.insert(webhookDeliveryLog).values({ endpoint_id: ep.id, payload }).returning(...);",
+              "  await qstash.publishJSON({ url: `${getAppUrl()}/api/webhooks/deliver`, body: { deliveryId: delivery.id }, retries: MAX_WEBHOOK_ATTEMPTS - 1 });",
+              "}));"
+            ],
+            "source": {
+              "file": "lib/webhook-emit.ts",
+              "symbol": "emitWebhook",
+              "lines": {
+                "start": 24,
+                "end": 28
+              }
+            },
+            "caption": {
+              "body": "Outbound: webhooks that can't hurt you. emitWebhook() never POSTs synchronously — it writes a delivery row and hands the job to QStash, which calls back with retries. Deliveries are HMAC-SHA256 signed; repeated failures warn the org, then auto-disable the endpoint. A slow customer server can never block a submit.",
+              "anchors": [
+                {
+                  "file": "lib/webhook-emit.ts",
+                  "symbol": "emitWebhook"
+                }
+              ]
+            }
+          },
+          {
+            "id": "three-debugging-facts",
+            "type": "callout",
+            "kind": "warning",
+            "title": "Three facts that save you a debugging afternoon",
+            "body": "1) Fields marked sensitive: true (like national_insurance_number) are stripped from webhook payloads and from localStorage backups. 2) Feature flags are server-only and authoritative — the registry-provider flags decide per-org registry spend (and its cap) from a dashboard, no deploy; never call a flag from a client component. 3) admin.localhost does not work in dev — browsers don't share cookies across localhost subdomains. Use a tunnel or hit /backoffice directly.",
+            "anchors": [
+              {
+                "file": "lib/webhook-emit.ts",
+                "symbol": "emitWebhook"
+              }
+            ]
+          },
+          {
+            "id": "logging-convention",
+            "type": "callout",
+            "kind": "connects-to",
+            "title": "Logging convention",
+            "body": "Inside request scope, prefer the request logger (getRequestLogger()) over console.* — but service-layer catch handlers stick with console.* because they also fire from cron/queue paths where getRequestLogger() throws.",
+            "anchors": [
+              {
+                "file": "lib/application-service.ts"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "overlay": [
+    {
+      "id": "where-to-go-next",
+      "target": {
+        "moduleId": "auth-plumbing"
+      },
+      "widget": {
+        "id": "next-steps-note",
+        "type": "callout",
+        "kind": "connects-to",
+        "title": "You've driven the whole system — where to go next",
+        "body": "The shape, config → form, the rule engine, the ownership engine the team is actively building, the transactional spine, the live wizard, the AI pipeline, and the doors in and out. Next: run the dev server and fill a seeded application with the network tab open; then read the last ~15 PRs — they're almost all ENG-250, and now they'll read fluently. Checkpoints missed? They reset per-browser — reload and retry."
+      }
+    }
+  ]
+}

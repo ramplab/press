@@ -1,0 +1,10 @@
+/* Behavioral overlays on the host widget's chip class. */
+
+.link {
+  text-decoration: none;
+}
+
+/* An inert chip is provenance, not a control: no pointer, no hover state. */
+.inert {
+  pointer-events: none;
+}

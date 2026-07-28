@@ -1,0 +1,195 @@
+/*
+ * RampLab theme layer — the Edition design language (issue #22).
+ *
+ * Source of truth: docs/design/research.md (§4.4 Edition, §4.5 code color)
+ * and docs/design/prototypes/direction-d.html (Edition variant). The
+ * reference-lab tokens this file used to port are gone.
+ *
+ * The register rule every surface obeys:
+ *   serif (--f-display / --f-body) — the author's voice: prose, chapter
+ *     titles, epigraphs, plates, captions, colophon.
+ *   sans (--f-ui) — the platform's machinery: nav, controls, labels,
+ *     kickers, metadata, node labels, checkpoint UI.
+ *   mono (--f-mono) — ONLY inside code and anchors.
+ *
+ * Themes: light (cream/oxblood) is the default and follows the system;
+ * an explicit `data-theme="light" | "dark"` on <html> overrides it.
+ */
+
+:root {
+  /* ---- type ---- */
+  --f-display: "Iowan Old Style", Charter, Georgia, "Times New Roman", serif;
+  --f-body: Charter, "Iowan Old Style", Georgia, "Palatino Linotype", serif;
+  /* Mono with a true italic where available (SF Mono, Cascadia); comments
+     are italic per §4.5, and Menlo/Consolas would only synthesize one. */
+  --f-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo,
+    Consolas, monospace;
+  --f-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter,
+    Roboto, "Helvetica Neue", sans-serif;
+  --fs-body: 17.5px;
+  --lh: 1.78;
+  --w-display: 420;
+  --track-display: 0;
+
+  /* ---- shape & rhythm ---- */
+  --r: 6px; /* Edition sits between Press (3) and Studio (10) */
+  --measure: 660px;
+  --leaf: 1140px;
+
+  /* ---- motion (150–250ms, purposeful) ---- */
+  --t-fast: 150ms;
+  --t-med: 200ms;
+  --t-slow: 250ms;
+}
+
+/* ---- paper & ink: light printing (warm cream, oxblood ink) ---- */
+:root {
+  color-scheme: light;
+  --paper: #f8f4ec;
+  --paper2: #f1ebdd;
+  --plate: #f3eee1;
+  --ink: #241f16;
+  --ink2: #635b4c;
+  /* --ink3 and --code-dim carry the reader's whole secondary layer: gutter
+     line numbers, step line refs, the walkthrough counter, quiz key caps,
+     "End of Chapter", system-map node anchors. They were set for recession
+     and landed at 2.1-3.3:1, under the 4.5:1 AA floor for body-size text,
+     which put the code anchors — the thing every claim is checked against —
+     among the least legible text on the page. Re-set to clear 4.5:1 with a
+     little headroom, same hue, still recessive. */
+  --ink3: #6e6657;
+  --rule: #e0d8c6;
+  --rule2: #cbc1a9;
+  --accent: #88422e;
+  --accent-ink: #f8f4ec;
+  --wash: rgba(136, 66, 46, 0.08);
+  --wash2: rgba(136, 66, 46, 0.16);
+  --ok: #3d7a4e;
+  --ok-wash: rgba(61, 122, 78, 0.11);
+  --bad: #a13a34;
+  --bad-wash: rgba(161, 58, 52, 0.09);
+  --shadow: 0 1px 0 rgba(60, 48, 30, 0.06);
+  --overlay-shadow: 0 10px 30px rgba(30, 20, 8, 0.16);
+
+  /* code panel */
+  --code-bg: #f0ead9;
+  --code-ink: #33291a;
+  --code-dim: #635c4e;
+  --code-hi: rgba(136, 66, 46, 0.1);
+  --code-bar: #88422e;
+
+  /* syntax roles (§4.5) — the palette colors the language, never the
+     subject: identifiers and struct fields stay --code-ink. */
+  --code-keyword: #88422e; /* oxblood — the edition's ink */
+  --code-fn: #2f5e83; /* Prussian blue */
+  --code-type: #6a3d74; /* aubergine */
+  --code-string: #326448; /* bottle green */
+  --code-num: #7c5310; /* tobacco */
+  --code-comment: #675d41; /* quiet sepia, set italic */
+  --code-punct: #5c5340;
+
+  /* inline code in prose — the identifier set apart in the author's serif
+     voice. Ink tracks --code-ink (the same identifier ink as the code panel);
+     the tint is a warm oxblood wash restrained enough to sit calmly mid-line. */
+  --inline-code-bg: rgba(136, 66, 46, 0.07);
+  --inline-code-ink: #4a3a24;
+  --inline-code-border: rgba(136, 66, 46, 0.15);
+}
+
+/* ---- dark printing (warm black, terracotta ink) ---- */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: #171410;
+  --paper2: #1e1a14;
+  --plate: #1c1812;
+  --ink: #e9e2d1;
+  --ink2: #a89f8b;
+  --ink3: #8c8576;
+  --rule: #2e2920;
+  --rule2: #40392b;
+  --accent: #d3906f;
+  --accent-ink: #171410;
+  --wash: rgba(211, 144, 111, 0.12);
+  --wash2: rgba(211, 144, 111, 0.22);
+  --ok: #83bb92;
+  --ok-wash: rgba(131, 187, 146, 0.12);
+  --bad: #d38177;
+  --bad-wash: rgba(211, 129, 119, 0.11);
+  --shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  --overlay-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+
+  --code-bg: #1e1a13;
+  --code-ink: #ddd5c1;
+  --code-dim: #9d9584;
+  --code-hi: rgba(211, 144, 111, 0.13);
+  --code-bar: #d3906f;
+
+  --code-keyword: #d3906f; /* terracotta */
+  --code-fn: #8ab4d8; /* powder blue */
+  --code-type: #c3a5dc; /* wisteria */
+  --code-string: #97c1a4; /* sage */
+  --code-num: #cfa35d; /* honey */
+  --code-comment: #a29574; /* dry olive, italic */
+  --code-punct: #a2977c;
+
+  --inline-code-bg: rgba(211, 144, 111, 0.1);
+  --inline-code-ink: #e2d9c6;
+  --inline-code-border: rgba(211, 144, 111, 0.2);
+}
+
+/* System-following: without an explicit choice, a dark system gets the dark
+   printing. Values duplicated from [data-theme='dark'] above — keep in sync. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --paper: #171410;
+    --paper2: #1e1a14;
+    --plate: #1c1812;
+    --ink: #e9e2d1;
+    --ink2: #a89f8b;
+    --ink3: #8c8576;
+    --rule: #2e2920;
+    --rule2: #40392b;
+    --accent: #d3906f;
+    --accent-ink: #171410;
+    --wash: rgba(211, 144, 111, 0.12);
+    --wash2: rgba(211, 144, 111, 0.22);
+    --ok: #83bb92;
+    --ok-wash: rgba(131, 187, 146, 0.12);
+    --bad: #d38177;
+    --bad-wash: rgba(211, 129, 119, 0.11);
+    --shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+    --overlay-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+
+    --code-bg: #1e1a13;
+    --code-ink: #ddd5c1;
+    --code-dim: #9d9584;
+    --code-hi: rgba(211, 144, 111, 0.13);
+    --code-bar: #d3906f;
+
+    --code-keyword: #d3906f;
+    --code-fn: #8ab4d8;
+    --code-type: #c3a5dc;
+    --code-string: #97c1a4;
+    --code-num: #cfa35d;
+    --code-comment: #a29574;
+    --code-punct: #a2977c;
+
+    --inline-code-bg: rgba(211, 144, 111, 0.1);
+    --inline-code-ink: #e2d9c6;
+    --inline-code-border: rgba(211, 144, 111, 0.2);
+  }
+}
+
+/* Purposeful motion only; readers who ask for none get none. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+  html {
+    scroll-behavior: auto !important;
+  }
+}

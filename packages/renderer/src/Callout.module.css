@@ -1,0 +1,65 @@
+/* Editorial notes: sidenote-style apparatus — hairline rule, sans kicker,
+   serif body. Kind is expressed typographically, not with filled boxes. */
+.callout {
+  margin: 34px 0;
+  padding: 2px 0 2px 18px;
+  border-left: 2px solid var(--rule2);
+}
+
+.callout[data-kind='warning'] {
+  border-left-color: var(--accent);
+}
+
+.kicker {
+  display: block;
+  font-family: var(--f-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 6px;
+}
+
+.callout[data-kind='warning'] .kicker {
+  color: var(--accent);
+}
+
+.overlayBadge {
+  margin-left: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  border: 1px solid var(--rule2);
+  border-radius: 999px;
+  padding: 1px 8px;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.body {
+  margin: 0;
+  font-size: calc(var(--fs-body) - 1px);
+  color: var(--ink);
+}
+
+.title {
+  font-weight: 700;
+}
+
+.anchors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.anchor {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: var(--ink2);
+  border: 1px solid var(--rule2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  background: var(--paper2);
+}

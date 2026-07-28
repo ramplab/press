@@ -1,0 +1,297 @@
+/* The checkpoint: operated surface in sans; the section title and the bound
+   completion moment are serif — the book speaking (direction-d.html). */
+.frame {
+  margin-top: 88px;
+}
+
+.head {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.kicker {
+  display: block;
+  font-family: var(--f-ui);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+
+.overlayBadge {
+  margin-left: 10px;
+  color: var(--accent);
+  border: 1px solid var(--rule2);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.title {
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  letter-spacing: var(--track-display);
+  font-size: clamp(22px, 3vw, 27px);
+  margin: 12px 0 0;
+}
+
+.sub {
+  font-family: var(--f-ui);
+  font-size: 13px;
+  color: var(--ink3);
+  margin: 10px 0 0;
+}
+
+.tally {
+  color: var(--ink2);
+}
+
+.question {
+  margin-top: 44px;
+  font-family: var(--f-ui);
+}
+
+.prompt {
+  font-weight: 600;
+  font-size: 16px;
+  max-width: 36em;
+  margin: 0;
+}
+
+.promptNumber {
+  color: var(--ink3);
+  font-weight: 400;
+  margin-right: 10px;
+}
+
+.status {
+  color: var(--ok);
+}
+
+.question[data-outcome='incorrect'] .status {
+  color: var(--bad);
+}
+
+.options {
+  margin-top: 14px;
+}
+
+.option {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  border-radius: var(--r);
+  color: var(--ink2);
+  font-family: var(--f-ui);
+  font-size: 15px;
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--t-med), border-color var(--t-med), color var(--t-med);
+}
+
+.option:hover:not(:disabled),
+.option:focus-visible:not(:disabled) {
+  background: var(--wash);
+  color: var(--ink);
+}
+
+.option[aria-pressed='true'] {
+  border-color: var(--rule2);
+  background: var(--wash);
+  color: var(--ink);
+}
+
+.option:disabled {
+  cursor: default;
+}
+
+/* Studio's key caps: operated UI, quiet until the verdict colors them. */
+.keyCap {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--rule2);
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink3);
+  align-self: flex-start;
+  margin-top: 2px;
+  transition: all var(--t-med);
+}
+
+.option[data-state='correct'] {
+  border-color: var(--ok);
+  background: var(--ok-wash);
+  color: var(--ink);
+}
+
+.option[data-state='correct'] .keyCap {
+  border-color: var(--ok);
+  background: var(--ok);
+  color: #fff;
+}
+
+.option[data-state='wrong'] {
+  border-color: var(--bad);
+  background: var(--bad-wash);
+}
+
+.option[data-state='wrong'] .keyCap {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.actions {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.checkButton {
+  font-family: var(--f-ui);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 5px 16px;
+  cursor: pointer;
+  transition: opacity var(--t-med);
+}
+
+.checkButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.retryButton {
+  font-family: var(--f-ui);
+  font-size: 12px;
+  color: var(--ink2);
+  border: 1px solid var(--rule2);
+  border-radius: 999px;
+  padding: 4px 14px;
+  background: none;
+  cursor: pointer;
+  transition: border-color var(--t-med), color var(--t-med);
+}
+
+.retryButton:hover,
+.retryButton:focus-visible {
+  border-color: var(--ink3);
+  color: var(--ink);
+}
+
+.verdict {
+  font-size: 13px;
+  color: var(--ok);
+  font-weight: 600;
+}
+
+.verdictWrong {
+  font-size: 13px;
+  color: var(--bad);
+  font-weight: 600;
+}
+
+/* Anchored explanation: shown on right AND wrong — the checkpoint teaches. */
+.explanation {
+  margin: 14px 0 0 12px;
+  padding: 4px 0 4px 16px;
+  border-left: 2px solid var(--ok);
+  font-size: 13px;
+  color: var(--ink2);
+  max-width: 34em;
+  animation: rise var(--t-slow) ease;
+}
+
+.question[data-outcome='incorrect'] .explanation {
+  border-left-color: var(--rule2);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anchors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.anchor {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: var(--ink2);
+  border: 1px solid var(--rule2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  background: var(--paper2);
+  cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+
+.anchor:hover {
+  border-color: var(--ink3);
+  color: var(--ink);
+}
+
+/* The bound moment: restrained — ink stars, a serif line, a quiet sub. */
+.complete {
+  margin: 56px auto 0;
+  max-width: 520px;
+  text-align: center;
+  padding: 26px 30px;
+  border-top: 1px solid var(--rule2);
+  border-bottom: 1px solid var(--rule2);
+  animation: bind 0.9s ease;
+}
+
+@keyframes bind {
+  0% {
+    background: var(--ok-wash);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+.stars {
+  color: var(--ok);
+  font-size: 18px;
+  letter-spacing: 0.4em;
+  text-indent: 0.4em;
+}
+
+.bound {
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: 19px;
+  margin-top: 10px;
+}
+
+.completeSub {
+  font-family: var(--f-ui);
+  font-size: 13px;
+  color: var(--ink3);
+  margin-top: 8px;
+}

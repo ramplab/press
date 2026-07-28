@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "id": "code-widgets-fixture",
+  "title": "Code Widgets Fixture Lab",
+  "base": {
+    "modules": [
+      {
+        "id": "parsing-seam",
+        "title": "The Parsing Seam",
+        "widgets": [
+          {
+            "id": "parse-walkthrough",
+            "type": "code-walkthrough",
+            "title": "How a spec gets parsed",
+            "source": {
+              "file": "packages/spec/src/parse.ts",
+              "symbol": "safeParseLabSpec",
+              "lines": { "start": 24, "end": 29 }
+            },
+            "code": [
+              "export function safeParseLabSpec(input) {",
+              "  if (typeof input !== 'object') return reject(input);",
+              "  const version = input.schemaVersion;",
+              "  if (version !== SCHEMA_VERSION) return unsupported(version);",
+              "  return labSpecSchema.safeParse(input);",
+              "}"
+            ],
+            "steps": [
+              {
+                "lines": { "start": 1, "end": 2 },
+                "commentary": {
+                  "body": "Non-objects are rejected before Zod ever runs.",
+                  "anchors": [
+                    { "file": "packages/spec/src/parse.ts", "symbol": "safeParseLabSpec" }
+                  ]
+                }
+              },
+              {
+                "lines": { "start": 3, "end": 4 },
+                "commentary": {
+                  "body": "The version gate comes first, so old parsers fail loudly.",
+                  "anchors": [
+                    { "file": "packages/spec/src/parse.ts", "symbol": "SCHEMA_VERSION" }
+                  ]
+                }
+              },
+              {
+                "lines": { "start": 5, "end": 6 },
+                "commentary": {
+                  "body": "Only then does the schema get its say.",
+                  "anchors": [
+                    { "file": "packages/spec/src/schema.ts", "symbol": "labSpecSchema" }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "anchor-figure",
+            "type": "code-figure",
+            "source": {
+              "file": "packages/spec/src/schema.ts",
+              "symbol": "anchorSchema",
+              "lines": { "start": 30, "end": 33 }
+            },
+            "code": [
+              "export const anchorSchema = z.object({",
+              "  file: z.string().min(1),",
+              "  symbol: z.string().min(1).optional(),",
+              "});"
+            ],
+            "highlight": { "start": 2, "end": 3 },
+            "caption": {
+              "body": "File is the only required coordinate; symbol sharpens it.",
+              "anchors": [
+                { "file": "packages/spec/src/schema.ts", "symbol": "anchorSchema" }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "overlay": [
+    {
+      "id": "lead-walkthrough-note",
+      "target": { "moduleId": "parsing-seam" },
+      "widget": {
+        "id": "tribal-walkthrough",
+        "type": "code-walkthrough",
+        "title": "What actually bites people",
+        "code": ["const version = input.schemaVersion;"],
+        "steps": [
+          {
+            "lines": { "start": 1, "end": 1 },
+            "commentary": {
+              "body": "Unanchored tribal knowledge: most bad specs are just missing schemaVersion."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "lead-figure-note",
+      "target": { "moduleId": "parsing-seam", "afterWidgetId": "anchor-figure" },
+      "widget": {
+        "id": "tribal-figure",
+        "type": "code-figure",
+        "code": ["// anchors are cheap — add more than you think you need"],
+        "caption": {
+          "body": "Unanchored team note: over-anchor, staleness detection is free."
+        }
+      }
+    }
+  ]
+}

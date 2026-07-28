@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "id": "decision-table-fixture",
+  "title": "Decision Table Fixture Lab",
+  "base": {
+    "modules": [
+      {
+        "id": "parse-gate",
+        "title": "The Parse Gate",
+        "widgets": [
+          {
+            "id": "spec-parse-table",
+            "type": "decision-table",
+            "title": "safeParseLabSpec — first rejection wins",
+            "inputs": [
+              {
+                "id": "shape",
+                "label": "Shape of the incoming JSON",
+                "type": "select",
+                "options": [
+                  { "value": "object", "label": "a plain object" },
+                  { "value": "array", "label": "an array" }
+                ],
+                "default": "object"
+              },
+              {
+                "id": "version-known",
+                "label": "schemaVersion is 1",
+                "type": "boolean",
+                "default": true
+              },
+              {
+                "id": "anchored",
+                "label": "Every machine claim carries an anchor",
+                "type": "boolean",
+                "default": true
+              }
+            ],
+            "rules": [
+              {
+                "when": [{ "input": "shape", "equals": "array" }],
+                "outcome": "rejected — not an object",
+                "explanation": {
+                  "body": "Anything but a plain object is refused before schema validation even runs.",
+                  "anchors": [
+                    { "file": "packages/spec/src/parse.ts", "symbol": "safeParseLabSpec" }
+                  ]
+                }
+              },
+              {
+                "when": [{ "input": "version-known", "equals": false }],
+                "outcome": "rejected — unsupported schemaVersion",
+                "explanation": {
+                  "body": "The version gate runs before Zod, so old renderers never half-render a newer spec.",
+                  "anchors": [
+                    { "file": "packages/spec/src/parse.ts", "symbol": "SCHEMA_VERSION" }
+                  ]
+                }
+              },
+              {
+                "when": [{ "input": "anchored", "equals": false }],
+                "outcome": "rejected — unanchored claim",
+                "explanation": {
+                  "body": "Machine-generated content without at least one code anchor fails the schema outright.",
+                  "anchors": [
+                    { "file": "packages/spec/src/schema.ts", "symbol": "calloutWidgetSchema" }
+                  ]
+                }
+              }
+            ],
+            "defaultOutcome": {
+              "outcome": "parsed — LabSpec returned",
+              "explanation": {
+                "body": "Every gate passed; the caller gets a typed LabSpec.",
+                "anchors": [{ "file": "packages/spec/src/parse.ts", "symbol": "parseLabSpec" }]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "overlay": [
+    {
+      "id": "lead-table-note",
+      "target": { "moduleId": "parse-gate" },
+      "widget": {
+        "id": "tribal-table",
+        "type": "decision-table",
+        "title": "When to ping the lead",
+        "inputs": [
+          {
+            "id": "blocked",
+            "label": "Blocked for more than a day",
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "rules": [
+          {
+            "when": [{ "input": "blocked", "equals": true }],
+            "outcome": "ping the lead",
+            "explanation": { "body": "Unanchored tribal knowledge: a nudge beats a ticket." }
+          }
+        ],
+        "defaultOutcome": { "outcome": "keep digging" }
+      }
+    }
+  ]
+}
